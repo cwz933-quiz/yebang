@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>77회 약사국시 예방약학 (해냄 3p)</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        h1 { font-size: 20px; color: #333; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
+        .progress { text-align: right; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; line-height: 1.5; }
+        .options { list-style: none; padding: 0; }
+        .options li { margin-bottom: 10px; }
+        .options button { width: 100%; padding: 12px; font-size: 16px; text-align: left; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .options button:hover { background-color: #e8f5e9; }
+        .options button.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .options button.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
+        .feedback strong { color: #d9534f; }
+        .next-btn { display: none; width: 100%; padding: 15px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 18px; margin-top: 20px; cursor: pointer; }
+        .next-btn:hover { background-color: #45a049; }
+        .result-screen { text-align: center; display: none; }
+        .score { font-size: 40px; font-weight: bold; color: #4CAF50; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div id="quiz-box">
+        <h1>💊 예방약학 3p 실전 모의고사</h1>
+        <div class="progress" id="progress">문제 1 / 30</div>
+        <div class="question" id="question-text">문제 로딩중...</div>
+        <ul class="options" id="options-list"></ul>
+        <div class="feedback" id="feedback"></div>
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">다음 문제</button>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1>수고했습니다! 자네의 점수는?</h1>
+        <div class="score" id="final-score"></div>
+        <p id="score-message"></p>
+        <button class="next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "1. 다음 중 AhR(Aryl hydrocarbon Receptor)과 결합하여 CYP1A 유도를 일으키는 물질은?", a: ["Rifampin", "Ethanol", "Phenobarbital", "PCB, TCDD", "Clofibrate"], c: 3, expl: "CYP1A는 AhR과 결합하며 유도물질은 PCB, B(a)P, TCDD입니다. (암기팁: 안쓰면 배가 밥먹고 1등했다 아싸리)" },
+        { q: "2. PXR(Pregnane X Receptor)을 매개로 하여 CYP3A4 효소를 강력하게 유도하는 약물은?", a: ["Cimetidine", "Rifampin", "Isoniazid", "Grapefruit juice", "Ethanol"], c: 1, expl: "CYP3A4 유도체는 Rifampin(PXR 매개)입니다. (암기팁: 리범 3개를 PX에서 샀어)" },
+        { q: "3. Isoniazid 투여 시 말초신경염 발생 빈도가 높은 대사적 특징을 가진 환자군은?", a: ["G6PD 결핍", "NAT2 Slow acetylator", "CYP2D6 Ultra-rapid", "UGT1A1 결핍", "ALDH 결핍"], c: 1, expl: "Isoniazid는 NAT2에 의해 아세틸화되는데, Slow acetylator는 배설 지연으로 신경 독성이 증가합니다." },
+        { q: "4. 신생아에서 UGT 활성이 낮아 Chloramphenicol 투여 시 발생하는 독성은?", a: ["핵황달", "Gray baby syndrome", "용혈성 빈혈", "메트헤모글로빈혈증", "담즙 정체"], c: 1, expl: "신생아는 UGT1A1 활성이 낮아 Chloramphenicol이 축적되어 회색아기증후군이 발생합니다." },
+        { q: "5. Ethanol 대사 중 Acetaldehyde를 Acetate로 전환하는 효소를 억제하여 금주요법에 이용하는 기전은?", a: ["Catalase 억제", "CYP2E1 억제", "ALDH 억제 (Disulfiram)", "ADH 억제", "Peroxidase 억제"], c: 2, expl: "ALDH를 억제하면 숙취 물질인 Acetaldehyde가 축적되어 술을 못 마시게 됩니다." },
+        { q: "6. 장내세균의 β-glucosidase에 의해 당이 떨어지며 Cyanide(청산)를 생성하는 배당체는?", a: ["Cycasin", "Amygdalin", "Prontosil", "Methotrexate", "Sulfasalazine"], c: 1, expl: "Amygdalin은 장내세균에 의해 가수분해되어 청산을 생성합니다." },
+        { q: "7. 소철 성분으로, 장내세균에 의해 활성화되어 발암물질(MAM)을 생성하는 것은?", a: ["Benzo(a)pyrene", "Dimethylnitrosamine", "Cycasin", "Aflatoxin B1", "Vinyl chloride"], c: 2, expl: "Cycasin은 장내세균의 β-glucosidase에 의해 가수분해되어 발암성을 띱니다." },
+        { q: "8. 장간순환(Enterohepatic circulation)에서 포합체를 가수분해하여 재흡수를 돕는 핵심 효소는?", a: ["Nitroreductase", "Azoreductase", "β-glucuronidase", "Sulfatase", "Decarboxylase"], c: 2, expl: "β-glucuronidase가 Glucuronide 포합을 끊어 지용성을 높여 재흡수시킵니다." },
+        { q: "9. 약물의 담즙 배설에 대한 설명으로 올바른 것은?", a: ["분자량 200 이하", "지용성 물질 그대로 배설", "분자량 >450, 극성 음이온 포합체", "수동적 과정", "재흡수 없음"], c: 2, expl: "담즙 배설은 분자량이 크고(>450), 극성인 음이온 포합체가 능동 수송됩니다." },
+        { q: "10. 간 소엽 중심정맥(Zone 3) 괴사를 유발하며, CYP에 의한 활성화가 필수적인 물질은?", a: ["Allyl alcohol", "Fe", "Phosphorus", "CCl4", "Doxorubicin"], c: 3, expl: "Zone 3는 CYP가 많습니다. CCl4는 CYP에 의해 라디칼이 되어 중심정맥 부위를 파괴합니다." },
+        { q: "11. 간 소엽 문맥 주위(Zone 1)에 손상을 주며, 산소 농도가 높은 곳에서 독성이 큰 물질은?", a: ["Acetaminophen", "Halothane", "Allyl alcohol", "Ethanol", "Nitrosamine"], c: 2, expl: "Zone 1(고산소)에서 Allyl alcohol은 Acrolein으로 산화되어 독성을 나타냅니다." },
+        { q: "12. 간세포 내 중성지방 배출 저해로 지방간(Fatty liver)을 유발하는 대표 물질은?", a: ["Penicillin", "Ethanol", "Vitamin C", "Glucose", "Glucagon"], c: 1, expl: "Ethanol, CCl4 등은 VLDL 합성을 방해하여 지방간을 유발합니다." },
+        { q: "13. Acetaminophen 과량 복용 시 간 괴사 기전은?", a: ["Glucuronide 축적", "Sulfate 침전", "CYP 대사로 NAPQI 생성 및 GSH 고갈", "신장 배설 억제", "담즙 정체"], c: 2, expl: "대사 포화 -> CYP 경로 -> NAPQI 생성 -> GSH 고갈 -> 간세포 괴사." },
+        { q: "14. 신장 사구체 족세포(Podocyte)에 손상을 주어 단백뇨를 유발하는 물질은?", a: ["Cadmium", "Puromycin", "CCl4", "Lithium", "Mercury"], c: 1, expl: "Puromycin, Doxorubicin 등은 사구체 독성을 나타냅니다." },
+        { q: "15. 재흡수가 활발한 근위세뇨관(Proximal tubule)에 손상을 주는 중금속은?", a: ["Cadmium (Cd)", "Lithium", "Amphotericin B", "NSAIDs", "Puromycin"], c: 0, expl: "근위세뇨관 독성: Cd(이타이이타이), Hg, Gentamicin 등." },
+        { q: "16. 집합관에서 ADH 작용을 방해하여 신성 요붕증을 유발하는 약물은?", a: ["Penicillin", "Lithium", "Acetaminophen", "Cisplatin", "Gentamicin"], c: 1, expl: "Lithium은 ADH를 길항하여 집합관에서 수분 재흡수를 방해합니다." },
+        { q: "17. 헤모글로빈 철(Fe)이 3가로 산화되어 산소 운반이 저하된 상태는?", a: ["용혈성 빈혈", "재생불량성 빈혈", "메트헤모글로빈혈증", "철결핍성 빈혈", "거대적혈구 빈혈"], c: 2, expl: "Fe2+ -> Fe3+로 산화되면 메트헤모글로빈(Met-Hb)이 됩니다." },
+        { q: "18. 메트헤모글로빈혈증을 유발하는 대표적인 물질은?", a: ["Glucose", "Ethanol", "Vitamin C", "Aniline, Nitrobenzene", "Calcium"], c: 3, expl: "방향족 아민(Aniline), 니트로 화합물(Nitrobenzene) 등이 원인입니다." },
+        { q: "19. 메트헤모글로빈혈증 해독제(Fe3+ -> Fe2+ 환원)는?", a: ["Deferoxamine", "EDTA", "Methylene blue", "Atropine", "Pralidoxime"], c: 2, expl: "치료제는 Methylene blue입니다." },
+        { q: "20. 활성산소 생성으로 심장독성을 유발하는 항암제는?", a: ["Cisplatin", "Methotrexate", "Doxorubicin", "Vincristine", "Bleomycin"], c: 2, expl: "Doxorubicin은 Redox cycle로 활성산소를 만들어 심장독성을 유발합니다." },
+        { q: "21. BBB 통과 후 대사되어 도파민 신경을 파괴, 파킨슨병 유사 증상을 일으키는 물질은?", a: ["MSG", "MPTP", "TTX", "Acrylamide", "Lead"], c: 1, expl: "MPTP는 뇌에서 MPP+로 대사되어 도파민 신경세포를 파괴합니다." },
+        { q: "22. 축삭 돌기 말단부터 변성(Dying-back)을 일으키는 물질은?", a: ["TTX", "CO", "Acrylamide, n-Hexane", "Ach", "Glutamate"], c: 2, expl: "Acrylamide와 n-Hexane은 축삭병증(Axonopathy)을 유발합니다." },
+        { q: "23. 글루탐산 수용체를 자극하여 흥분성 신경독성을 유발하는 식품 첨가물은?", a: ["Saccharin", "Aspartame", "MSG", "Caffeine", "Sorbitol"], c: 2, expl: "MSG는 글루탐산염으로 흥분성 독성을 가질 수 있습니다." },
+        { q: "24. 에스트로겐 수용체와 결합하는 내분비계 교란 물질(비스페놀 A)은?", a: ["Thalidomide", "Bisphenol A", "Acetaminophen", "Paraquat", "Nicotine"], c: 1, expl: "Bisphenol A(BPA)는 대표적인 환경호르몬(Xenoestrogen)입니다." },
+        { q: "25. 임신부 입덧 약으로 쓰이다 태아 사지결손(Phocomelia)을 유발한 약물은?", a: ["DES", "Thalidomide", "Valproic acid", "Ethanol", "Cocaine"], c: 1, expl: "탈리도마이드(Thalidomide) 사건입니다." },
+        { q: "26. 임신 중 복용 시 태어난 딸(F1)의 질암 발생을 높이는 물질은?", a: ["DDT", "Dioxin", "DES", "PCB", "TCDD"], c: 2, expl: "DES(Diethylstilbestrol)는 경태반 발암물질입니다." },
+        { q: "27. 살모넬라 균주(His-)를 이용한 유전자 돌연변이 시험법은?", a: ["소핵 시험", "Ames test", "염색체 이상 시험", "Draize test", "Comet assay"], c: 1, expl: "Ames test는 복귀돌연변이를 이용합니다." },
+        { q: "28. Ames Test에서 S-9 mixture를 넣는 이유는?", a: ["박테리아 성장 촉진", "대사적 활성화(간접발암물질 검출)", "세포벽 투과성 증대", "위양성 감소", "영양 공급"], c: 1, expl: "간 효소(CYP)를 포함한 S-9 분획을 넣어 대사 후 발암성이 생기는 물질을 검출합니다." },
+        { q: "29. 토끼 눈/피부를 이용한 국소 자극성 시험은?", a: ["Ames test", "Draize test", "Hershberger assay", "Dominant lethal test", "Comet assay"], c: 1, expl: "Draize test는 안점막 자극 시험입니다." },
+        { q: "30. GFR 측정의 표준물질(여과만 되고 재흡수/분비 X)은?", a: ["Glucose", "PAH", "Inulin", "Urea", "Albumin"], c: 2, expl: "Inulin은 사구체 여과율(GFR) 측정의 Gold Standard입니다." }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const questionText = document.getElementById("question-text");
+    const optionsList = document.getElementById("options-list");
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("next-btn");
+    const progress = document.getElementById("progress");
+    const quizBox = document.getElementById("quiz-box");
+    const resultScreen = document.getElementById("result-screen");
+    const finalScore = document.getElementById("final-score");
+    const scoreMessage = document.getElementById("score-message");
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionText.innerText = q.q;
+        optionsList.innerHTML = "";
+        feedback.style.display = "none";
+        nextBtn.style.display = "none";
+        progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+
+        q.a.forEach((option, index) => {
+            const li = document.createElement("li");
+            const btn = document.createElement("button");
+            btn.innerText = option;
+            btn.onclick = () => checkAnswer(index, btn);
+            li.appendChild(btn);
+            optionsList.appendChild(li);
+        });
+    }
+
+    function checkAnswer(selectedIndex, btn) {
+        const q = quizData[currentQuestion];
+        const buttons = optionsList.querySelectorAll("button");
+        
+        // Disable all buttons
+        buttons.forEach(b => b.disabled = true);
+
+        if (selectedIndex === q.c) {
+            btn.classList.add("correct");
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+            score++;
+        } else {
+            btn.classList.add("wrong");
+            buttons[q.c].classList.add("correct");
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+        }
+
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        quizBox.style.display = "none";
+        resultScreen.style.display = "block";
+        finalScore.innerText = `${score} / ${quizData.length}점`;
+        
+        if (score >= 25) {
+            scoreMessage.innerText = "대단하네! 이 정도면 국시 예방약학은 걱정 없겠어!";
+        } else if (score >= 15) {
+            scoreMessage.innerText = "잘했네! 틀린 부분만 다시 복습하면 완벽할 걸세.";
+        } else {
+            scoreMessage.innerText = "조금 더 분발하게. 해냄 3페이지를 다시 꼼꼼히 읽어보게나.";
+        }
+    }
+
+    // 초기 로드
+    loadQuestion();
+</script>
+
+</body>
+</html>
