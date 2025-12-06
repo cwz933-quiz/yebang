@@ -28,9 +28,16 @@
         .input-container { display: flex; gap: 10px; margin-bottom: 10px; }
         .input-answer { flex: 1; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; outline: none; transition: border 0.3s; }
         .input-answer:focus { border-color: #4CAF50; }
-        .submit-btn { padding: 12px 20px; background-color: #2196F3; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        /* 버튼 스타일 */
+        .submit-btn { padding: 12px 15px; background-color: #2196F3; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
         .submit-btn:hover { background-color: #1976D2; }
         .submit-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* 새로 추가된 정답 확인(포기) 버튼 스타일 */
+        .check-btn { padding: 12px 15px; background-color: #f44336; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .check-btn:hover { background-color: #d32f2f; }
+        .check-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
         .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
         .feedback strong { color: #d9534f; }
@@ -58,7 +65,8 @@
         
         <div class="input-container" id="input-area" style="display:none;">
             <input type="text" class="input-answer" id="text-input" placeholder="정답을 입력하세요">
-            <button class="submit-btn" id="submit-answer-btn" onclick="checkTextAnswer()">확인</button>
+            <button class="submit-btn" id="submit-answer-btn" onclick="checkTextAnswer()">제출</button>
+            <button class="check-btn" id="check-answer-btn" onclick="showAnswerDirectly()">정답 확인</button>
         </div>
 
         <div class="feedback" id="feedback"></div>
@@ -426,6 +434,7 @@
     const inputArea = document.getElementById("input-area");
     const textInput = document.getElementById("text-input");
     const submitBtn = document.getElementById("submit-answer-btn");
+    const checkBtn = document.getElementById("check-answer-btn"); // 정답 확인 버튼
     
     const feedback = document.getElementById("feedback");
     const nextBtn = document.getElementById("next-btn");
@@ -459,21 +468,35 @@
             optionsList.style.display = "none";
             inputArea.style.display = "flex";
             
+            // 이미 풀었거나 포기했던 문제라면 상태 복구
             if (userAnswers[currentQuestion] !== null) {
-                textInput.value = userAnswers[currentQuestion];
+                // 사용자가 답을 입력했으면 그 값을, 포기했으면 빈값이나 표시를 유지
+                if (userAnswers[currentQuestion] === "GIVE_UP") {
+                    textInput.value = "";
+                    textInput.placeholder = "포기한 문제입니다.";
+                } else {
+                    textInput.value = userAnswers[currentQuestion];
+                }
+                
                 textInput.disabled = true;
                 submitBtn.disabled = true;
+                checkBtn.disabled = true; // 버튼 비활성화
+                
                 showFeedbackText(textCorrectness[currentQuestion]);
             } else {
+                // 안 푼 문제라면 초기화
                 textInput.value = "";
+                textInput.placeholder = "정답을 입력하세요";
                 textInput.disabled = false;
                 submitBtn.disabled = false;
+                checkBtn.disabled = false; // 버튼 활성화
+                
                 nextBtn.style.display = "none";
                 textInput.focus();
             }
 
         } else {
-            // [객관식 모드] - 데이터에 객관식 문제가 추가될 경우를 대비
+            // [객관식 모드]
             optionsList.style.display = "block";
             inputArea.style.display = "none";
             
@@ -507,7 +530,21 @@
         }
     }
 
-    // 주관식 정답 체크 (핵심 키워드 매칭 로직 적용)
+    // [New] 입력 없이 바로 정답 확인하는 함수
+    function showAnswerDirectly() {
+        // 포기한 것으로 처리
+        userAnswers[currentQuestion] = "GIVE_UP"; 
+        textCorrectness[currentQuestion] = false; // 당연히 오답 처리
+
+        textInput.disabled = true;
+        submitBtn.disabled = true;
+        checkBtn.disabled = true; // 버튼 재클릭 방지
+
+        // 오답 피드백 표시 (정답 보여줌)
+        showFeedbackText(false);
+    }
+
+    // 주관식 정답 체크
     function checkTextAnswer() {
         const userVal = textInput.value.trim();
         if (!userVal) return; 
@@ -516,39 +553,24 @@
         
         const q = quizData[currentQuestion];
         
-        // 1. 사용자 입력 정규화 (소문자 변환, 공백 제거)
         const cleanUser = userVal.toLowerCase().replace(/\s+/g, "");
         const originAns = q.a;
         
-        // 2. 정답 문자열을 분해하여 키워드 리스트 생성
-        // 괄호(), 콤마(,), 슬래시(/), 더하기(+) 등을 구분자로 사용
-        // 예: "파괴점 (불연속점, Breakpoint)" -> ["파괴점", "불연속점", "breakpoint"]
         let processedAns = originAns
-            .replace(/[\(\),\/+]/g, "|") // 구분자를 파이프로 변경
-            .replace(/->/g, "|")         // 화살표 제거
-            .replace(/(A:|B:)/g, "|");   // A:, B: 라벨 제거
+            .replace(/[\(\),\/+]/g, "|") 
+            .replace(/->/g, "|")         
+            .replace(/(A:|B:)/g, "|");   
 
-        // 배열로 만들고 정규화
         const keywords = processedAns.split("|")
             .map(k => k.toLowerCase().replace(/\s+/g, ""))
             .filter(k => k.length > 0);
 
-        // 3. 정답 판별: 키워드 중 하나라도 정확히 일치하면 정답
         let isCorrect = false;
 
-        // Case A: 키워드 리스트에 사용자 입력이 정확히 포함된 경우
         if (keywords.includes(cleanUser)) {
             isCorrect = true;
         } 
-        // Case B: 혹시 사용자가 전체 풀네임을 썼는데 띄어쓰기만 틀린 경우를 대비
         else if (cleanUser.length > 1 && originAns.toLowerCase().replace(/\s+/g, "").includes(cleanUser)) {
-             // 단, 너무 짧은 단어(1글자)가 포함되는 건 오답 처리 (예: '점' 입력 시 '파괴점' 인정 안함)
-             // 여기서 좀 더 엄격하게 하려면 Case A만 써도 됨. 
-             // 하지만 "염소소독" 같은 복합어 처리를 위해 남겨둠.
-             // 안전하게 하기 위해, 입력값이 키워드 중 하나의 '일부분'이 아니라,
-             // 정답 전체 문자열에서 매칭되는지 확인 (단, 2글자 이상)
-             // 여기서는 키워드 매칭(Case A)을 우선시하되, 
-             // 사용자가 "파괴점불연속점" 같이 다 붙여 쓴 경우도 정답 처리
              if (originAns.toLowerCase().replace(/[\(\),]/g, "").replace(/\s+/g, "") === cleanUser) {
                  isCorrect = true;
              }
@@ -558,6 +580,7 @@
 
         textInput.disabled = true;
         submitBtn.disabled = true;
+        checkBtn.disabled = true; // 정답을 맞췄으니 정답확인 버튼도 비활성화
 
         showFeedbackText(isCorrect);
     }
@@ -570,6 +593,7 @@
             feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
         } else {
             textInput.style.borderColor = "#f44336"; 
+            // GIVE_UP인 경우 "오답입니다" 대신 다른 문구 혹은 그대로 유지 가능
             feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a}</strong> 입니다.<br>${q.expl}`;
         }
         feedback.style.display = "block";
