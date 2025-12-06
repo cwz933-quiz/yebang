@@ -16,99 +16,99 @@
             margin: 0; 
         }
         
-        /* 화면 너비를 1000px로 넓힘 */
         .menu-container { 
             background-color: white; 
             width: 90%; 
             max-width: 1000px; 
-            padding: 40px; 
+            padding: 30px; /* 패딩을 조금 줄임 */
             border-radius: 20px; 
             box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
             text-align: center; 
         }
 
-        h1 { color: #2E7D32; margin-bottom: 10px; }
-        p { color: #666; margin-bottom: 40px; }
+        h1 { color: #2E7D32; margin-bottom: 5px; font-size: 28px; }
+        p { color: #666; margin-bottom: 30px; font-size: 14px; }
         
-        /* 3단 레이아웃을 위한 컨테이너 */
         .columns-wrapper {
             display: flex;
             justify-content: space-between;
-            gap: 20px; /* 컬럼 사이 간격 */
+            gap: 15px; 
             align-items: flex-start;
         }
 
-        /* 개별 컬럼 스타일 (단답형/객관식/전범위) */
         .category-col {
-            flex: 1; /* 3등분 */
+            flex: 1; 
             display: flex;
             flex-direction: column;
-            gap: 15px; /* 버튼 사이 간격 */
+            gap: 8px; /* 버튼 사이 간격을 좁힘 (15px -> 8px) */
         }
 
-        /* 카테고리 제목 스타일 */
         .category-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-bottom: 2px solid #4CAF50;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
-        /* 버튼 기본 스타일 */
+        /* 슬림해진 버튼 스타일 */
         .btn { 
             display: flex; 
-            align-items: center;
-            justify-content: center;
-            height: 100px; /* 버튼 높이 통일 */
-            padding: 10px; 
+            align-items: center; /* 세로 중앙 정렬 */
+            justify-content: space-between; /* 좌우로 내용 벌리기 */
+            min-height: 55px; /* 높이를 대폭 줄임 (100px -> 55px) */
+            padding: 0 15px; 
             background-color: #fff; 
             color: #333; 
-            border: 2px solid #4CAF50; 
-            border-radius: 10px; 
-            font-size: 16px; 
+            border: 1px solid #4CAF50; /* 테두리 두께 1px로 조정 */
+            border-radius: 8px; 
+            font-size: 14px; /* 글자 크기 조정 */
             font-weight: bold; 
             text-decoration: none; 
             transition: all 0.2s; 
             box-sizing: border-box; 
-            line-height: 1.4;
-            word-break: keep-all;
         }
-        .btn:hover { background-color: #4CAF50; color: white; transform: translateY(-2px); }
+        
+        .btn:hover { 
+            background-color: #4CAF50; 
+            color: white; 
+            transform: translateY(-2px); 
+        }
 
-        /* 예비(추가 예정) 버튼 스타일 */
+        /* 버튼 내부 텍스트 정렬 */
+        .btn-text-main { text-align: left; }
+        .btn-text-sub { font-size: 11px; font-weight: normal; color: #888; }
+        
+        /* 호버 시 서브 텍스트 색상 변경 */
+        .btn:hover .btn-text-sub { color: #e8f5e9; }
+
+        /* 예비 버튼 스타일 */
         .btn-placeholder {
-            border: 2px dashed #ccc; /* 점선 테두리 */
-            color: #aaa;
-            background-color: #fafafa;
-            cursor: default; /* 클릭 커서 없애기 */
-            font-size: 14px;
+            border: 1px dashed #ccc;
+            color: #bbb;
+            background-color: #fcfcfc;
+            justify-content: center; /* 가운데 정렬 */
+            cursor: default;
         }
         .btn-placeholder:hover {
-            transform: none; /* 호버 효과 제거 */
-            background-color: #fafafa;
-            color: #aaa;
+            transform: none;
+            background-color: #fcfcfc;
+            color: #bbb;
         }
         
         .cheer-text {
-            margin-top: 40px;
-            font-size: 18px; 
+            margin-top: 30px;
+            font-size: 16px; 
             font-weight: bold;
             color: #4CAF50;
         }
 
-        .footer { margin-top: 15px; font-size: 12px; color: #aaa; }
+        .footer { margin-top: 10px; font-size: 11px; color: #aaa; }
 
-        /* 모바일 대응: 화면이 좁아지면 세로로 정렬 */
         @media (max-width: 768px) {
-            .columns-wrapper {
-                flex-direction: column;
-            }
-            .category-col {
-                width: 100%;
-                margin-bottom: 30px;
-            }
+            .columns-wrapper { flex-direction: column; }
+            .category-col { width: 100%; margin-bottom: 20px; }
         }
     </style>
 </head>
@@ -122,37 +122,51 @@
             
             <div class="category-col">
                 <div class="category-title">단답형</div>
+                
                 <a href="quiz2.html" class="btn">
-                    <br>단답형 55제(해냄2p)<br><span style="font-size:12px; font-weight:normal; color:#666;"> </span>
+                    <span class="btn-text-main"단답형 55제</span>
+                    <span class="btn-text-sub">해냄 2p</span>
                 </a>
-                <div class="btn btn-placeholder">
-                    추가 예정<br>(업데이트 대기)
-                </div>
+                
+                <div class="btn btn-placeholder">1p회 추가 예정</div>
+                <div class="btn btn-placeholder">3p회 추가 예정</div>
+                <div class="btn btn-placeholder">4p회 추가 예정</div>
+                <div class="btn btn-placeholder">5p회 추가 예정</div>
+                <div class="btn btn-placeholder">6p 추가 예정</div>
             </div>
 
             <div class="category-col">
                 <div class="category-title">객관식</div>
+                
                 <a href="quiz1.html" class="btn">
-                    제1회<br>객관식 30제<br><span style="font-size:12px; font-weight:normal; color:#666;">(해냄 3p)</span>
+                    <span class="btn-text-main">객관식 30제</span>
+                    <span class="btn-text-sub">해냄 3p</span>
                 </a>
-                <div class="btn btn-placeholder">
-                    추가 예정<br>(업데이트 대기)
-                </div>
+                
+                <div class="btn btn-placeholder">1p 추가 예정</div>
+                <div class="btn btn-placeholder">2p 추가 예정</div>
+                <div class="btn btn-placeholder">4p 추가 예정</div>
+                <div class="btn btn-placeholder">5p 추가 예정</div>
+                <div class="btn btn-placeholder">6p 추가 예정</div>
             </div>
 
             <div class="category-col">
                 <div class="category-title">전범위 모의고사</div>
+                
                 <a href="quiz3.html" class="btn">
-                    제3회<br>전범위<br>통합 모의고사
+                    <span class="btn-text-main">1회 전범위 모의고사</span>
                 </a>
-                <div class="btn btn-placeholder">
-                    추가 예정<br>(업데이트 대기)
-                </div>
+                
+                <div class="btn btn-placeholder">2회 추가 예정</div>
+                <div class="btn btn-placeholder">3회 추가 예정</div>
+                <div class="btn btn-placeholder">4회 추가 예정</div>
+                <div class="btn btn-placeholder">5회 추가 예정</div>
+                <div class="btn btn-placeholder">6회 추가 예정</div>
             </div>
 
         </div>
-        <div class="cheer-text">삼약 20 파이팅!! 👊</div>
 
+        <div class="cheer-text">삼약 20 파이팅!! 👊</div>
         <div class="footer">Created by 삼약20장학생</div>
     </div>
 
