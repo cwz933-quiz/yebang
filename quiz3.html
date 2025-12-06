@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>77회 약사국시 예방약학 (해냄 전범위)</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; }
+        
+        /* 메인으로 가기 버튼 스타일 */
+        .home-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding: 8px 12px;
+            background-color: #f1f3f5;
+            border-radius: 20px;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        .home-btn:hover { background-color: #e9ecef; color: #333; }
+
+        h1 { font-size: 20px; color: #333; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-top: 0; }
+        .progress { text-align: right; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; line-height: 1.5; }
+        .options { list-style: none; padding: 0; }
+        .options li { margin-bottom: 10px; }
+        .options button { width: 100%; padding: 12px; font-size: 16px; text-align: left; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .options button:hover { background-color: #e8f5e9; }
+        
+        /* 정답/오답 스타일 */
+        .options button.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .options button.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        
+        .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
+        .feedback strong { color: #d9534f; }
+        
+        /* 버튼 컨테이너 (좌우 배치) */
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; display: none; }
+        .prev-btn { background-color: #6c757d; color: white; }
+        .prev-btn:hover { background-color: #5a6268; }
+        .next-btn { background-color: #4CAF50; color: white; }
+        .next-btn:hover { background-color: #45a049; }
+
+        .result-screen { text-align: center; display: none; }
+        .score { font-size: 40px; font-weight: bold; color: #4CAF50; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <a href="index.html" class="home-btn">🏠 메인 메뉴로</a>
+
+    <div id="quiz-box">
+        <h1>💊 예방약학 전범위(해냄 요약) 모의고사</h1>
+        <div class="progress" id="progress">문제 1 / 20</div>
+        <div class="question" id="question-text">문제 로딩중...</div>
+        <ul class="options" id="options-list"></ul>
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">⬅️ 이전 문제</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 문제 ➡️</button>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1>수고했습니다! 자네의 점수는?</h1>
+        <div class="score" id="final-score"></div>
+        <p id="score-message"></p>
+        <div class="btn-container">
+            <button class="nav-btn next-btn" style="display:block; background-color:#666;" onclick="location.href='index.html'">메인으로</button>
+            <button class="nav-btn next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 20 Questions covering all 6 pages of 'Haenaem'
+    const quizData = [
+        { 
+            q: "1. 다음 중 질병 발생과 요인 사이의 인과관계를 파악하기 위해, 현재 시점에서 위험 요인에 노출된 집단과 비노출 집단을 추적 관찰하여 질병 발생률을 비교하는 역학 연구 방법은?", 
+            a: ["단면 연구", "환자-대조군 연구", "코호트 연구", "생태학적 연구", "임상 시험"], 
+            c: 2, 
+            expl: "코호트 연구는 요인 노출 여부에 따라 노출군과 비노출군을 추적 관찰하여 두 군의 질병 발생률을 비교하고 '상대위험도(RR)'를 산출하는 전향적 연구 방법입니다." 
+        },
+        { 
+            q: "2. 대기 오염 현상 중, 자동차 배기가스(질소산화물, 탄화수소)가 자외선과 반응하여 생성되며, 낮 시간대에 농도가 높고 산화적 성질을 띠는 'LA형 스모그'의 주요 성분은?", 
+            a: ["이산화황 (SO2)", "일산화탄소 (CO)", "PAN (Peroxyacyl nitrate)", "먼지 (Dust)", "암모니아 (NH3)"], 
+            c: 2, 
+            expl: "LA형 스모그(광화학 스모그)는 2차 오염물질로, 주요 성분은 O3, PAN, Aldehyde 등이며 산화력이 강한 것이 특징입니다." 
+        },
+        { 
+            q: "3. 다음 중 IARC(국제암연구소) 발암물질 분류에서 '사람에게 발암성이 확인된 물질(Group 1)'에 해당하며, 특히 백혈병(Leukemia)을 유발하는 것으로 알려진 물질은?", 
+            a: ["벤젠 (Benzene)", "톨루엔 (Toluene)", "DDT", "비스페놀 A (Bisphenol A)", "자일렌 (Xylene)"], 
+            c: 0, 
+            expl: "벤젠은 조혈독성(골수독성)이 있어 재생불량성 빈혈 및 백혈병을 유발하는 1급 발암물질입니다. (톨루엔은 Hippuric acid로 대사됨)" 
+        },
+        { 
+            q: "4. 중금속 중독 시 사용되는 해독제(Chelating agent) 중, 비소(As), 수은(Hg), 금(Au) 등의 중독 치료에 사용되며 'BAL'이라고도 불리는 약물은?", 
+            a: ["EDTA", "Penicillamine", "Deferoxamine", "Dimercaprol", "Atropine"], 
+            c: 3, 
+            expl: "Dimercaprol(BAL)은 비소, 수은, 납, 금 등의 중독 시 사용하는 -SH기를 가진 해독제입니다." 
+        },
+        { 
+            q: "5. 납(Pb) 중독 시 헴(Heme) 합성이 저해되어 빈혈이 발생하는데, 이 과정에서 납이 억제하는 주요 효소는?", 
+            a: ["Glutathione peroxidase", "ALA dehydratase (ALA 탈수소효소)", "Cytochrome oxidase", "Superoxide dismutase", "Acetylcholinesterase"], 
+            c: 1, 
+            expl: "납은 Heme 합성 과정에서 ALA 탈수소효소와 Ferrochelatase(헴 합성효소)를 억제하여 빈혈을 유발하고, 소변 중 ALA 배설을 증가시킵니다." 
+        },
+        { 
+            q: "6. 카드뮴(Cd) 만성 중독의 대표적인 질환으로, 신장 근위세뇨관 재흡수 장애와 심한 골다공증 및 골연화증을 동반하여 '아프다 아프다'라는 뜻을 가진 병은?", 
+            a: ["미나마타병", "이타이이타이병", "윌슨병", "레이노 증후군", "파킨슨병"], 
+            c: 1, 
+            expl: "카드뮴은 신장 독성(근위세뇨관 손상)을 일으켜 칼슘 재흡수를 방해하며, 이로 인해 뼈가 약해지는 골연화증과 이타이이타이병을 유발합니다." 
+        },
+        { 
+            q: "7. 수질 오염 지표 중, 호기성 미생물이 일정 기간 동안 물속의 유기물을 분해하는 데 소비하는 산소량을 의미하며, 이 수치가 높을수록 수질 오염도가 높음을 나타내는 것은?", 
+            a: ["DO (용존산소)", "COD (화학적 산소요구량)", "BOD (생물학적 산소요구량)", "SS (부유물질)", "pH"], 
+            c: 2, 
+            expl: "BOD(생물학적 산소요구량)는 미생물이 유기물을 분해할 때 소비하는 산소의 양으로, 수치가 높을수록 유기물 오염이 심함을 의미합니다." 
+        },
+        { 
+            q: "8. 상수도 소독 시 염소 처리를 할 때, pH 5 이하의 산성 조건에서 가장 많이 존재하며 살균력이 가장 강한 형태는?", 
+            a: ["OCl- (차아염소산 이온)", "HOCl (차아염소산)", "NH2Cl (Monochloramine)", "NCl3 (Trichloramine)", "Cl2 (Gas)"], 
+            c: 1, 
+            expl: "유리잔류염소 중 HOCl(차아염소산)은 OCl-(차아염소산 이온)보다 살균력이 약 80배 강하며, pH가 낮을수록(산성) HOCl의 비율이 높아집니다." 
+        },
+        { 
+            q: "9. 약물 대사 효소인 Cytochrome P450 (CYP) 중, Acetaminophen 대사에 관여하여 독성 대사체인 NAPQI를 생성하며, 에탄올(술)에 의해 유도가 촉진되는 효소는?", 
+            a: ["CYP1A2", "CYP2C9", "CYP2D6", "CYP2E1", "CYP3A4"], 
+            c: 3, 
+            expl: "CYP2E1은 Ethanol, Isoniazid 등에 의해 유도되며, Acetaminophen을 독성 물질인 NAPQI로 대사시켜 간 독성을 유발합니다." 
+        },
+        { 
+            q: "10. 간 소엽(Liver lobule) 구조에서, 중심정맥(Central vein) 주변인 Zone 3에 주로 분포하며, CCl4나 Acetaminophen에 의한 괴사가 가장 먼저 일어나는 부위의 특징은?", 
+            a: ["산소 농도가 가장 높다.", "글루타치온(GSH) 농도가 가장 높다.", "CYP 효소 활성이 가장 높다.", "담즙산 분비가 가장 왕성하다.", "재생 능력이 가장 뛰어나다."], 
+            c: 2, 
+            expl: "Zone 3(중심정맥 부위)는 산소와 GSH 농도는 낮지만 CYP 활성이 높아, CYP에 의해 활성화되는 독성 물질(CCl4 등)에 의한 괴사가 호발합니다." 
+        },
+        { 
+            q: "11. 다음 중 신장 독성을 유발하는 물질과 그 주요 손상 부위가 바르게 짝지어진 것은?", 
+            a: ["Gentamicin - 사구체", "Cadmium - 원위세뇨관", "Mercury (Hg) - 근위세뇨관", "Amphotericin B - 사구체", "Cyclosporin - 집합관"], 
+            c: 2, 
+            expl: "신장 독성에서 중금속(Cd, Hg)과 아미노글리코사이드계 항생제(Gentamicin)는 주로 재흡수가 활발한 '근위세뇨관'에 손상을 입힙니다." 
+        },
+        { 
+            q: "12. 화학물질의 변이원성을 검색하는 'Ames test'에서 사용하는 균주인 Salmonella typhimurium의 특징은?", 
+            a: ["Histidine 요구성 (His-)", "Tryptophan 요구성 (Trp-)", "Lactose 분해 능력 보유", "Ampicillin 내성", "포자를 형성함"], 
+            c: 0, 
+            expl: "Ames test는 Histidine을 스스로 합성하지 못하는(His-) Salmonella typhimurium 돌연변이 균주를 이용하여, 역돌연변이(His+로 복귀) 여부를 봅니다." 
+        },
+        { 
+            q: "13. 비타민 결핍증 중, 옥수수를 주식으로 하는 사람들에게서 발생하기 쉬우며, 3D 증상(피부염, 설사, 치매)을 특징으로 하는 '펠라그라(Pellagra)'의 원인 결핍 비타민은?", 
+            a: ["Vitamin B1 (Thiamine)", "Vitamin B2 (Riboflavin)", "Vitamin B3 (Niacin)", "Vitamin B6 (Pyridoxine)", "Vitamin C (Ascorbic acid)"], 
+            c: 2, 
+            expl: "Niacin(Vit B3) 결핍은 펠라그라를 유발합니다. 옥수수는 트립토판(Niacin 전구체)이 부족하여 결핍이 발생하기 쉽습니다." 
+        },
+        { 
+            q: "14. 지용성 비타민 중 간에서 혈액 응고 인자(Prothrombin 등)의 합성에 필수적이며, 결핍 시 신생아 출혈이나 혈액 응고 지연을 유발하는 것은?", 
+            a: ["Vitamin A", "Vitamin D", "Vitamin E", "Vitamin K", "Vitamin F"], 
+            c: 3, 
+            expl: "Vitamin K는 간에서 혈액 응고 인자의 γ-carboxylation에 관여하여 혈액 응고를 돕습니다." 
+        },
+        { 
+            q: "15. 단백질의 영양가를 평가하는 방법 중, 식품 단백질 내 함량이 가장 부족한 필수 아미노산(제1 제한 아미노산)의 비율로 결정되는 지표는?", 
+            a: ["생물가 (BV)", "단백질 효율 (PER)", "화학가 (Chemical Score)", "정미단백이용률 (NPU)", "단백질 소화율"], 
+            c: 2, 
+            expl: "화학가(Chemical Score)는 표준 단백질(주로 달걀)의 아미노산 조성과 비교하여, 가장 부족한 '제1 제한 아미노산'에 의해 결정되는 지표입니다." 
+        },
+        { 
+            q: "16. 여름철 해산물 섭취로 인해 주로 발생하며, 호염성(염분을 좋아함) 균으로 급성 위장염을 일으키는 식중독 원인균은?", 
+            a: ["Salmonella enteritidis", "Staphylococcus aureus", "Vibrio parahaemolyticus", "Clostridium botulinum", "Escherichia coli O157"], 
+            c: 2, 
+            expl: "장염 비브리오(Vibrio parahaemolyticus)는 호염성 세균으로 여름철 오염된 어패류 섭취 시 발생하며, 급성 위장염을 유발합니다." 
+        },
+        { 
+            q: "17. 복어 독(Tetrodotoxin)과 마비성 패독(Saxitoxin)의 공통된 신경 독성 작용 기전은?", 
+            a: ["아세틸콜린 분해 효소 억제", "신경세포막의 Na+ 채널 차단", "Ca2+ 채널 차단", "GABA 수용체 억제", "단백질 합성 저해"], 
+            c: 1, 
+            expl: "Tetrodotoxin(복어독)과 Saxitoxin(마비성 패독)은 신경세포의 Na+ 채널을 차단하여 활동전위 전도를 막아 호흡 마비 등을 유발합니다." 
+        },
+        { 
+            q: "18. 곰팡이 독소(Mycotoxin) 중 Aspergillus flavus에 의해 생성되며, 강력한 간암 유발 물질(Hepatocarcinogen)로 알려진 것은?", 
+            a: ["Aflatoxin B1", "Ochratoxin", "Patulin", "Zearalenone", "Ergotamine"], 
+            c: 0, 
+            expl: "아플라톡신(Aflatoxin)은 곰팡이 독소 중 가장 강력한 간암 유발 물질로, CYP 효소에 의해 에폭사이드(Epoxide)로 활성화되어 DNA와 결합합니다." 
+        },
+        { 
+            q: "19. 식품 첨가물 중 보존료 및 발색제로 사용되지만, 산성 조건에서 2급 아민과 반응하여 발암물질인 Nitrosamine을 생성할 수 있는 물질은?", 
+            a: ["안식향산", "소르빈산", "아질산염 (Nitrite)", "이산화황", "프로피온산"], 
+            c: 2, 
+            expl: "아질산염(Nitrite)은 육류의 발색제 및 보존료로 쓰이지만, 위장 내 산성 조건에서 아민류와 반응하여 발암물질인 Nitrosamine을 생성할 수 있습니다." 
+        },
+        { 
+            q: "20. 소음성 난청(Noise-induced hearing loss)의 초기 특징으로, 4,000Hz 부근의 고음역에서 청력 손실이 가장 먼저 나타나는 현상은?", 
+            a: ["일과성 역치 이동 (TTS)", "C5-dip 현상", "영구적 역치 이동 (PTS)", "이명 (Tinnitus)", "고막 천공"], 
+            c: 1, 
+            expl: "소음성 난청은 초기에는 자각 증상이 없으나 4,000Hz(C5) 영역에서 청력 손실이 가장 크게 나타나는 'C5-dip 현상'이 특징적입니다." 
+        }
+    ];
+
+    let currentQuestion = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    const questionText = document.getElementById("question-text");
+    const optionsList = document.getElementById("options-list");
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
+    const progress = document.getElementById("progress");
+    const quizBox = document.getElementById("quiz-box");
+    const resultScreen = document.getElementById("result-screen");
+    const finalScore = document.getElementById("final-score");
+    const scoreMessage = document.getElementById("score-message");
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionText.innerText = q.q;
+        optionsList.innerHTML = "";
+        
+        progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+        
+        if (currentQuestion === 0) {
+            prevBtn.style.display = "none";
+        } else {
+            prevBtn.style.display = "block";
+        }
+
+        const answeredIndex = userAnswers[currentQuestion];
+        const isAnswered = answeredIndex !== null;
+
+        if (isAnswered) {
+            feedback.style.display = "block";
+            nextBtn.style.display = "block";
+            if (currentQuestion === quizData.length - 1) {
+                 nextBtn.innerText = "결과 보기";
+            } else {
+                 nextBtn.innerText = "다음 문제 ➡️";
+            }
+            
+            if (answeredIndex === q.c) {
+                feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+            } else {
+                feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+            }
+        } else {
+            feedback.style.display = "none";
+            nextBtn.style.display = "none";
+        }
+
+        q.a.forEach((option, index) => {
+            const li = document.createElement("li");
+            const btn = document.createElement("button");
+            btn.innerText = option;
+            
+            if (isAnswered) {
+                btn.disabled = true;
+                if (index === q.c) {
+                    btn.classList.add("correct");
+                } else if (index === answeredIndex && index !== q.c) {
+                    btn.classList.add("wrong");
+                }
+            } else {
+                btn.onclick = () => checkAnswer(index, btn);
+            }
+            
+            li.appendChild(btn);
+            optionsList.appendChild(li);
+        });
+    }
+
+    function checkAnswer(selectedIndex, btn) {
+        userAnswers[currentQuestion] = selectedIndex;
+        
+        const q = quizData[currentQuestion];
+        const buttons = optionsList.querySelectorAll("button");
+        buttons.forEach(b => b.disabled = true);
+
+        if (selectedIndex === q.c) {
+            btn.classList.add("correct");
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+        } else {
+            btn.classList.add("wrong");
+            buttons[q.c].classList.add("correct");
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+        }
+
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+        
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "결과 보기";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let finalScoreValue = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            if (userAnswers[i] === quizData[i].c) {
+                finalScoreValue++;
+            }
+        }
+
+        quizBox.style.display = "none";
+        resultScreen.style.display = "block";
+        finalScore.innerText = `${finalScoreValue} / ${quizData.length}점`;
+        
+        // 20문제 기준 평가 메시지 조정
+        if (finalScoreValue >= 18) {
+            scoreMessage.innerText = "대단하네! 이 정도면 국시 예방약학 수석도 노려볼 만해!";
+        } else if (finalScoreValue >= 12) {
+            scoreMessage.innerText = "잘했네! 틀린 부분만 다시 해냄 자료로 복습하면 완벽할 걸세.";
+        } else {
+            scoreMessage.innerText = "조금 더 분발하게. 올려준 해냄 자료 6페이지 전체를 꼼꼼히 다시 읽어보게나.";
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
