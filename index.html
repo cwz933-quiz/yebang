@@ -20,7 +20,7 @@
             background-color: white; 
             width: 90%; 
             max-width: 1000px; 
-            padding: 30px; /* 패딩을 조금 줄임 */
+            padding: 30px; 
             border-radius: 20px; 
             box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
             text-align: center; 
@@ -40,7 +40,7 @@
             flex: 1; 
             display: flex;
             flex-direction: column;
-            gap: 8px; /* 버튼 사이 간격을 좁힘 (15px -> 8px) */
+            gap: 8px; 
         }
 
         .category-title {
@@ -52,22 +52,23 @@
             padding-bottom: 8px;
         }
 
-        /* 슬림해진 버튼 스타일 */
+        /* 버튼 스타일 */
         .btn { 
             display: flex; 
-            align-items: center; /* 세로 중앙 정렬 */
-            justify-content: space-between; /* 좌우로 내용 벌리기 */
-            min-height: 55px; /* 높이를 대폭 줄임 (100px -> 55px) */
-            padding: 0 15px; 
+            align-items: center; 
+            justify-content: center; /* 텍스트 중앙 정렬로 변경 */
+            min-height: 55px; 
+            padding: 0 10px; /* 패딩 조정 */
             background-color: #fff; 
             color: #333; 
-            border: 1px solid #4CAF50; /* 테두리 두께 1px로 조정 */
+            border: 1px solid #4CAF50; 
             border-radius: 8px; 
-            font-size: 14px; /* 글자 크기 조정 */
+            font-size: 14px; 
             font-weight: bold; 
             text-decoration: none; 
             transition: all 0.2s; 
             box-sizing: border-box; 
+            text-align: center; /* 텍스트 중앙 정렬 */
         }
         
         .btn:hover { 
@@ -76,19 +77,11 @@
             transform: translateY(-2px); 
         }
 
-        /* 버튼 내부 텍스트 정렬 */
-        .btn-text-main { text-align: left; }
-        .btn-text-sub { font-size: 11px; font-weight: normal; color: #888; }
-        
-        /* 호버 시 서브 텍스트 색상 변경 */
-        .btn:hover .btn-text-sub { color: #e8f5e9; }
-
         /* 예비 버튼 스타일 */
         .btn-placeholder {
             border: 1px dashed #ccc;
             color: #bbb;
             background-color: #fcfcfc;
-            justify-content: center; /* 가운데 정렬 */
             cursor: default;
         }
         .btn-placeholder:hover {
@@ -123,28 +116,24 @@
             <div class="category-col">
                 <div class="category-title">단답형</div>
                 
-                <a href="quiz2.html" class="btn">
-                    <span class="btn-text-main"단답형 55제</span>
-                    <span class="btn-text-sub">해냄 2p</span>
-                </a>
+                <div class="btn btn-placeholder">1p 추가 예정</div>
                 
-                <div class="btn btn-placeholder">1p회 추가 예정</div>
-                <div class="btn btn-placeholder">3p회 추가 예정</div>
-                <div class="btn btn-placeholder">4p회 추가 예정</div>
-                <div class="btn btn-placeholder">5p회 추가 예정</div>
+                <a href="quiz2.html" class="btn">해냄 2p 단답형 55제</a>
+                
+                <div class="btn btn-placeholder">3p 추가 예정</div>
+                <div class="btn btn-placeholder">4p 추가 예정</div>
+                <div class="btn btn-placeholder">5p 추가 예정</div>
                 <div class="btn btn-placeholder">6p 추가 예정</div>
             </div>
 
             <div class="category-col">
                 <div class="category-title">객관식</div>
                 
-                <a href="quiz1.html" class="btn">
-                    <span class="btn-text-main">객관식 30제</span>
-                    <span class="btn-text-sub">해냄 3p</span>
-                </a>
-                
                 <div class="btn btn-placeholder">1p 추가 예정</div>
                 <div class="btn btn-placeholder">2p 추가 예정</div>
+                
+                <a href="quiz1.html" class="btn">해냄 3p 객관식 30제</a>
+                
                 <div class="btn btn-placeholder">4p 추가 예정</div>
                 <div class="btn btn-placeholder">5p 추가 예정</div>
                 <div class="btn btn-placeholder">6p 추가 예정</div>
@@ -153,9 +142,7 @@
             <div class="category-col">
                 <div class="category-title">전범위 모의고사</div>
                 
-                <a href="quiz3.html" class="btn">
-                    <span class="btn-text-main">1회 전범위 모의고사</span>
-                </a>
+                <a href="quiz3.html" class="btn">1회 전범위 모의고사</a>
                 
                 <div class="btn btn-placeholder">2회 추가 예정</div>
                 <div class="btn btn-placeholder">3회 추가 예정</div>
