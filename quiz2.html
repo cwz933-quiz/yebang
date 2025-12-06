@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>77회 약사국시 실전 모의고사</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; }
+        
+        /* 메인으로 가기 버튼 */
+        .home-btn { display: inline-block; text-decoration: none; color: #666; font-size: 14px; margin-bottom: 20px; padding: 8px 12px; background-color: #f1f3f5; border-radius: 20px; transition: all 0.2s; font-weight: bold; }
+        .home-btn:hover { background-color: #e9ecef; color: #333; }
+
+        h1 { font-size: 20px; color: #333; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-top: 0; }
+        .progress { text-align: right; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; line-height: 1.5; }
+        
+        /* 객관식 보기 스타일 */
+        .options { list-style: none; padding: 0; }
+        .options li { margin-bottom: 10px; }
+        .options button { width: 100%; padding: 12px; font-size: 16px; text-align: left; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .options button:hover { background-color: #e8f5e9; }
+        .options button.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .options button.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+
+        /* 주관식 입력 스타일 */
+        .input-container { display: flex; gap: 10px; margin-bottom: 10px; }
+        .input-answer { flex: 1; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; outline: none; transition: border 0.3s; }
+        .input-answer:focus { border-color: #4CAF50; }
+        .submit-btn { padding: 12px 20px; background-color: #2196F3; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .submit-btn:hover { background-color: #1976D2; }
+        .submit-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
+        .feedback strong { color: #d9534f; }
+        
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; display: none; }
+        .prev-btn { background-color: #6c757d; color: white; }
+        .next-btn { background-color: #4CAF50; color: white; }
+        
+        .result-screen { text-align: center; display: none; }
+        .score { font-size: 40px; font-weight: bold; color: #4CAF50; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <a href="index.html" class="home-btn">🏠 메인 메뉴로</a>
+
+    <div id="quiz-box">
+        <h1>💊 예방약학 실전 모의고사</h1>
+        <div class="progress" id="progress">문제 1 / 30</div>
+        <div class="question" id="question-text">문제 로딩중...</div>
+        
+        <ul class="options" id="options-list"></ul>
+        
+        <div class="input-container" id="input-area" style="display:none;">
+            <input type="text" class="input-answer" id="text-input" placeholder="정답을 입력하세요">
+            <button class="submit-btn" id="submit-answer-btn" onclick="checkTextAnswer()">확인</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">⬅️ 이전 문제</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 문제 ➡️</button>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1>수고했습니다! 자네의 점수는?</h1>
+        <div class="score" id="final-score"></div>
+        <p id="score-message"></p>
+        <div class="btn-container">
+            <button class="nav-btn next-btn" style="display:block; background-color:#666;" onclick="location.href='index.html'">메인으로</button>
+            <button class="nav-btn next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 💡 [문제 데이터 작성법]
+    // 1. 객관식: 기존과 동일 (type 생략 가능 또는 "choice")
+    // 2. 주관식: type: "text" 추가, a: "정답문자열" (보기 배열 아님!)
+    
+    const quizData = [
+        // ▼ [객관식 예시]
+        { 
+            type: "choice",
+            q: "1. 다음 중 AhR과 결합하여 CYP1A 유도를 일으키는 물질은?", 
+            a: ["Rifampin", "Ethanol", "Phenobarbital", "PCB, TCDD", "Clofibrate"], 
+            c: 3, 
+            expl: "CYP1A 유도물질은 PCB, TCDD 등입니다." 
+        },
+        // ▼ [주관식 예시] type: "text"
+        { 
+            type: "text",
+            q: "2. PXR을 매개로 CYP3A4 효소를 강력하게 유도하는 결핵 치료제는 무엇인가? (영문 성분명)", 
+            a: "Rifampin", // 정답 단어
+            expl: "Rifampin은 강력한 CYP3A4 유도제입니다." 
+        },
+        { 
+            type: "text",
+            q: "3. Isoniazid 대사에 관여하며, 활성이 느린 경우(Slow acetylator) 말초신경염을 유발하는 효소의 약어는?", 
+            a: "NAT2", 
+            expl: "NAT2(N-acetyltransferase 2)의 다형성에 따라 독성이 달라집니다." 
+        },
+        // ... 여기에 계속 추가 ...
+        {
+             q: "4. 신생아에서 UGT 활성이 낮아 Chloramphenicol 투여 시 발생하는 독성은?", 
+             a: ["핵황달", "Gray baby syndrome", "용혈성 빈혈", "메트헤모글로빈혈증", "담즙 정체"], 
+             c: 1, 
+             expl: "신생아는 UGT1A1 활성이 낮아 Gray baby syndrome이 발생합니다." 
+        }
+    ];
+
+    let currentQuestion = 0;
+    // 사용자 답안 저장 (객관식은 index, 주관식은 입력한 문자열)
+    let userAnswers = new Array(quizData.length).fill(null);
+    // 주관식 정답 여부 저장 (true/false)
+    let textCorrectness = new Array(quizData.length).fill(null);
+
+    const questionText = document.getElementById("question-text");
+    const optionsList = document.getElementById("options-list");
+    const inputArea = document.getElementById("input-area");
+    const textInput = document.getElementById("text-input");
+    const submitBtn = document.getElementById("submit-answer-btn");
+    
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
+    const progress = document.getElementById("progress");
+    const quizBox = document.getElementById("quiz-box");
+    const resultScreen = document.getElementById("result-screen");
+    const finalScore = document.getElementById("final-score");
+    const scoreMessage = document.getElementById("score-message");
+
+    // 엔터키 입력 시 정답 확인
+    textInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter" && !submitBtn.disabled) {
+            checkTextAnswer();
+        }
+    });
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionText.innerText = q.q;
+        optionsList.innerHTML = "";
+        feedback.style.display = "none";
+        progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+        
+        // 이전 버튼 관리
+        prevBtn.style.display = (currentQuestion === 0) ? "none" : "block";
+
+        // 문제 타입 확인 (기본값은 choice)
+        const qType = q.type || "choice";
+
+        if (qType === "text") {
+            // [주관식 모드]
+            optionsList.style.display = "none";
+            inputArea.style.display = "flex";
+            
+            // 이미 푼 경우 기록 복원
+            if (userAnswers[currentQuestion] !== null) {
+                textInput.value = userAnswers[currentQuestion];
+                textInput.disabled = true;
+                submitBtn.disabled = true;
+                showFeedbackText(textCorrectness[currentQuestion]);
+            } else {
+                textInput.value = "";
+                textInput.disabled = false;
+                submitBtn.disabled = false;
+                nextBtn.style.display = "none";
+                textInput.focus();
+            }
+
+        } else {
+            // [객관식 모드]
+            optionsList.style.display = "block";
+            inputArea.style.display = "none";
+            
+            const answeredIndex = userAnswers[currentQuestion];
+            const isAnswered = answeredIndex !== null;
+
+            if (isAnswered) {
+                showFeedbackChoice(answeredIndex);
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            q.a.forEach((option, index) => {
+                const li = document.createElement("li");
+                const btn = document.createElement("button");
+                btn.innerText = option;
+                
+                if (isAnswered) {
+                    btn.disabled = true;
+                    if (index === q.c) btn.classList.add("correct");
+                    else if (index === answeredIndex && index !== q.c) btn.classList.add("wrong");
+                } else {
+                    btn.onclick = () => checkChoiceAnswer(index, btn);
+                }
+                li.appendChild(btn);
+                optionsList.appendChild(li);
+            });
+        }
+    }
+
+    // 객관식 정답 체크
+    function checkChoiceAnswer(selectedIndex, btn) {
+        userAnswers[currentQuestion] = selectedIndex;
+        showFeedbackChoice(selectedIndex);
+    }
+
+    // 객관식 피드백 표시
+    function showFeedbackChoice(selectedIndex) {
+        const q = quizData[currentQuestion];
+        const buttons = optionsList.querySelectorAll("button");
+        buttons.forEach(b => b.disabled = true);
+
+        // 현재 화면의 버튼 상태 업데이트 (버튼이 존재할 때만)
+        if (buttons.length > 0) {
+            if (selectedIndex === q.c) {
+                buttons[selectedIndex].classList.add("correct");
+                feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+            } else {
+                buttons[selectedIndex].classList.add("wrong");
+                buttons[q.c].classList.add("correct");
+                feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+            }
+        }
+        
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+        updateNextBtnText();
+    }
+
+    // 주관식 정답 체크
+    function checkTextAnswer() {
+        const userVal = textInput.value.trim();
+        if (!userVal) return; // 빈칸이면 반응 X
+
+        userAnswers[currentQuestion] = userVal;
+        
+        const q = quizData[currentQuestion];
+        // 정답 비교 (대소문자 무시, 공백 제거 후 비교)
+        const cleanUser = userVal.toLowerCase().replace(/\s/g, "");
+        const cleanAns = q.a.toLowerCase().replace(/\s/g, "");
+
+        const isCorrect = (cleanUser === cleanAns);
+        textCorrectness[currentQuestion] = isCorrect;
+
+        textInput.disabled = true;
+        submitBtn.disabled = true;
+
+        showFeedbackText(isCorrect);
+    }
+
+    // 주관식 피드백 표시
+    function showFeedbackText(isCorrect) {
+        const q = quizData[currentQuestion];
+        if (isCorrect) {
+            textInput.style.borderColor = "#4CAF50"; // 초록 테두리
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+        } else {
+            textInput.style.borderColor = "#f44336"; // 빨강 테두리
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a}</strong> 입니다.<br>${q.expl}`;
+        }
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+        updateNextBtnText();
+    }
+
+    function updateNextBtnText() {
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "결과 보기";
+        } else {
+            nextBtn.innerText = "다음 문제 ➡️";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let finalScoreValue = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            const q = quizData[i];
+            const qType = q.type || "choice";
+
+            if (qType === "text") {
+                if (textCorrectness[i]) finalScoreValue++;
+            } else {
+                if (userAnswers[i] === q.c) finalScoreValue++;
+            }
+        }
+
+        quizBox.style.display = "none";
+        resultScreen.style.display = "block";
+        finalScore.innerText = `${finalScoreValue} / ${quizData.length}점`;
+        
+        if (finalScoreValue >= quizData.length * 0.8) {
+            scoreMessage.innerText = "대단하네! 주관식까지 완벽해!";
+        } else {
+            scoreMessage.innerText = "조금 더 분발하게. 쓰는 연습이 더 필요해 보여.";
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
