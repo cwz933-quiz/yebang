@@ -6,13 +6,62 @@
     <title>예방약학 기출 문제은행</title>
     <style>
         body { font-family: 'Apple SD Gothic Neo', sans-serif; background-color: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .menu-container { background-color: white; width: 90%; max-width: 500px; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+        .menu-container { background-color: white; width: 90%; max-width: 600px; /* 가로 배치를 위해 폭을 조금 넓힘 */ padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
         h1 { color: #2E7D32; margin-bottom: 10px; }
         p { color: #666; margin-bottom: 30px; }
-        .btn { display: block; width: 100%; padding: 15px; margin-bottom: 15px; background-color: #fff; color: #333; border: 2px solid #4CAF50; border-radius: 10px; font-size: 18px; font-weight: bold; text-decoration: none; transition: all 0.2s; box-sizing: border-box; }
-        .btn:hover { background-color: #4CAF50; color: white; transform: translateY(-2px); }
         
-        /* 응원 문구 스타일 추가 */
+        /* 기본 버튼 스타일 */
+        .btn { 
+            display: block; 
+            padding: 15px; 
+            background-color: #fff; 
+            color: #333; 
+            border: 2px solid #4CAF50; 
+            border-radius: 10px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            text-decoration: none; 
+            transition: all 0.2s; 
+            box-sizing: border-box; 
+        }
+        .btn:hover { background-color: #4CAF50; color: white; transform: translateY(-2px); }
+
+        /* 가로 배치 컨테이너 (새로 추가됨) */
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px; /* 버튼 사이 간격 */
+            margin-bottom: 15px;
+        }
+
+        /* 가로 배치 안의 버튼 스타일 조정 */
+        .btn-row .btn {
+            flex: 1; /* 3등분 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 120px; /* 높이를 고정하여 정사각형 느낌 */
+            padding: 10px;
+            font-size: 15px;
+            word-break: keep-all; /* 단어 중간 끊김 방지 */
+            line-height: 1.4;
+        }
+
+        /* 하단 준비중 버튼 스타일 (별도) */
+        .btn-full {
+            width: 100%;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            border-color: #ccc;
+            color: #aaa;
+        }
+        .btn-full:hover {
+            background-color: #eee;
+            border-color: #bbb;
+            color: #888;
+            transform: none;
+        }
+        
         .cheer-text {
             margin-top: 25px;
             font-size: 16px; 
@@ -29,12 +78,23 @@
         <h1>💊 예방약학 실전 모의고사</h1>
         <p>77회 약사국가고시 대비 문제은행</p>
 
-        <a href="quiz1.html" class="btn">제1회: 객관식 30제 (해냄 3p)</a>
-        <a href="quiz2.html" class="btn">제2회: 단답형 55제 (해냄 2p)</a>
-        <a href="quiz3.html" class="btn">제3회: 전 범위 모의고사 1회</a>
-        <a href="quiz4.html" class="btn">제4회: 다음 범위 (준비중)</a>
+        <div class="btn-row">
+            <a href="quiz2.html" class="btn">
+                제2회<br>단답형 55제<br><span style="font-size:12px; font-weight:normal">(해냄 2p)</span>
+            </a>
+            
+            <a href="quiz1.html" class="btn">
+                제1회<br>객관식 30제<br><span style="font-size:12px; font-weight:normal">(해냄 3p)</span>
+            </a>
+            
+            <a href="quiz3.html" class="btn">
+                제3회<br>전범위<br>모의고사
+            </a>
+        </div>
+
+        <a href="quiz4.html" class="btn btn-full">제4회: 다음 범위 (준비중)</a>
         
-        <div class="cheer-text">삼약 20 파이팅!!! 👊</div>
+        <div class="cheer-text">삼약 20 파이팅!! 👊</div>
 
         <div class="footer">Created by 삼약20장학생</div>
     </div>
