@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>77회 약사국시 실전 모의고사</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; }
+        
+        /* 메인으로 가기 버튼 */
+        .home-btn { display: inline-block; text-decoration: none; color: #666; font-size: 14px; margin-bottom: 20px; padding: 8px 12px; background-color: #f1f3f5; border-radius: 20px; transition: all 0.2s; font-weight: bold; }
+        .home-btn:hover { background-color: #e9ecef; color: #333; }
+
+        h1 { font-size: 20px; color: #333; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-top: 0; }
+        .progress { text-align: right; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; line-height: 1.5; word-break: keep-all; }
+        
+        /* 객관식 보기 스타일 */
+        .options { list-style: none; padding: 0; }
+        .options li { margin-bottom: 10px; }
+        .options button { width: 100%; padding: 12px; font-size: 16px; text-align: left; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .options button:hover { background-color: #e8f5e9; }
+        .options button.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .options button.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+
+        /* 주관식 입력 스타일 */
+        .input-container { display: flex; gap: 10px; margin-bottom: 10px; }
+        .input-answer { flex: 1; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; outline: none; transition: border 0.3s; }
+        .input-answer:focus { border-color: #4CAF50; }
+        
+        /* 버튼 스타일 */
+        .submit-btn { padding: 12px 15px; background-color: #2196F3; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .submit-btn:hover { background-color: #1976D2; }
+        .submit-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* 정답 확인(포기) 버튼 스타일 */
+        .check-btn { padding: 12px 15px; background-color: #f44336; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .check-btn:hover { background-color: #d32f2f; }
+        .check-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
+        .feedback strong { color: #d9534f; }
+        
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; display: none; }
+        .prev-btn { background-color: #6c757d; color: white; }
+        .next-btn { background-color: #4CAF50; color: white; }
+        
+        .result-screen { text-align: center; display: none; }
+        .score { font-size: 40px; font-weight: bold; color: #4CAF50; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <a href="index.html" class="home-btn">🏠 메인 메뉴로</a>
+
+    <div id="quiz-box">
+        <h1>💊 해냄 1p 단답형 50제</h1>
+        <div class="progress" id="progress">문제 1 / 50</div>
+        <div class="question" id="question-text">문제 로딩중...</div>
+        
+        <ul class="options" id="options-list"></ul>
+        
+        <div class="input-container" id="input-area" style="display:none;">
+            <input type="text" class="input-answer" id="text-input" placeholder="정답을 입력하세요">
+            <button class="submit-btn" id="submit-answer-btn" onclick="checkTextAnswer()">제출</button>
+            <button class="check-btn" id="check-answer-btn" onclick="showAnswerDirectly()">정답 확인</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">⬅️ 이전 문제</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 문제 ➡️</button>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1>수고했습니다! 자네의 점수는?</h1>
+        <div class="score" id="final-score"></div>
+        <p id="score-message"></p>
+        <div class="btn-container">
+            <button class="nav-btn next-btn" style="display:block; background-color:#666;" onclick="location.href='index.html'">메인으로</button>
+            <button class="nav-btn next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+    { type: "text", q: "1. 질병 발생의 3대 요인(삼각형)은 병인, 환경, 그리고 (     )이다.", a: "숙주 (Host)", expl: "질병 발생의 3대 요소: 병인, 숙주, 환경" },
+    { type: "text", q: "2. 질병의 자연사 중 병인 자극이 시작되어 숙주가 반응하는 시기로, 조기 발견과 조기 치료가 중요한 '2차 예방' 단계는 어느 시기인가?", a: "병원성기 (3단계)", expl: "증상이 나타나기 시작하는 초기 단계로 조기 진단이 중요합니다." },
+    { type: "text", q: "3. 예방약학적 대책 중 '재활'과 '사회 복귀'를 목표로 하는 단계는 몇 차 예방인가?", a: "3차 예방", expl: "질병의 악화 방지 및 재활은 3차 예방에 해당합니다." },
+    { type: "text", q: "4. 역학 연구 방법 중 '기술역학'은 가설을 (     )하는 단계이고, '분석역학'은 가설을 검증하는 단계이다.", a: "설정 (수립)", expl: "기술역학은 질병의 분포를 관찰하여 가설을 설정합니다." },
+    { type: "text", q: "5. 분석역학 중 질병이 있는 집단(환자)과 없는 집단(대조군)을 선정하여 과거의 노출 요인을 조사하는 연구 방법은?", a: "환자-대조군 연구 (Case-Control study)", expl: "과거를 추적하므로 후향적 연구라고도 합니다." },
+    { type: "text", q: "6. 환자-대조군 연구에서 산출할 수 있는 위험도 지표로, 환자군과 대조군의 노출 비를 나타내는 값은?", a: "교차비 (Odds ratio, OR)", expl: "발생률을 직접 구할 수 없어 교차비를 사용합니다." },
+    { type: "text", q: "7. 연구 시작시점에 자료를 수집하는 코호트 연구는 (     )적인 연구 방법이다.", a: "전향 (Prospective)", expl: "현재 노출 정보를 수집하고 미래의 질병 발생을 추적합니다." },
+    { type: "text", q: "8. 질병 발생률(Incidence)을 직접 산출할 수 있으며, 요인과 질병 간의 인과관계를 밝히기에 가장 강력한 관찰 연구 방법은?", a: "코호트 연구", expl: "시간적 선후 관계가 명확하여 신뢰도가 높습니다." },
+    { type: "text", q: "9. 코호트 연구에서 산출하는 위험도 지표로, (노출군의 질병 발생률 / 비노출군의 질병 발생률)로 계산하는 값은?", a: "상대위험도 (Relative Risk, RR)", expl: "RR이 1보다 크면 위험 요인으로 판단합니다." },
+    { type: "text", q: "10. 희귀 질병이나 잠복기가 긴 질병을 연구하기에 적합하여 시간과 비용이 절약되는 연구 방법은?", a: "환자-대조군 연구", expl: "환자를 이미 확보한 상태에서 시작하므로 효율적입니다." },
+    { type: "text", q: "11. 집단 검진의 타당도 지표 중, 실제 질병이 있는 사람을 검사에서 양성으로 판정하는 확률은?", a: "민감도 (Sensitivity)", expl: "질병자를 찾아내는 능력입니다." },
+    { type: "text", q: "12. 실제 질병이 없는 사람을 검사에서 질병이 없다고(음성) 정확하게 판정하는 확률은?", a: "특이도 (Specificity)", expl: "건강한 사람을 건강하다고 판정하는 능력입니다." },
+    { type: "text", q: "13. 병원체가 숙주에 침입하여 증상이 발현되기까지의 기간을 무엇이라 하는가?", a: "잠복기 (Incubation period)", expl: "증상이 없는 기간입니다." },
+    { type: "text", q: "14. 병원체가 숙주에 침입하여 균 배출이 가장 많아 감염력이 가장 높은 시점까지의 기간을 무엇이라 하는가?", a: "세대기 (Generation time)", expl: "감염 확산 관리에 중요한 지표입니다." },
+    { type: "text", q: "15. 감염병 유행을 막기 위해 집단 내 면역 인구의 비율이 일정 수준 이상 유지되어야 한다는 개념은?", a: "집단면역 (Herd immunity)", expl: "백신 접종의 주요 목표 중 하나입니다." },
+    { type: "text", q: "16. 생물 농축 계수(BCF)는 ( 생물체내 농도 /      )로 계산한다.", a: "환경매체내 농도 (물 농도)", expl: "수중 환경 농도 대비 생체 내 농도 비입니다." },
+    { type: "text", q: "17. 런던형 스모그의 주원인 물질은 석탄 연소에 의한 (     )와 분진이다.", a: "SO2 (이산화황/아황산가스)", expl: "황산화물이 안개와 결합하여 발생했습니다." },
+    { type: "text", q: "18. LA형 스모그(광화학 스모그)는 주로 자동차 배기가스인 탄화수소와 (     ), 그리고 자외선에 의해 발생한다.", a: "NOx (질소산화물)", expl: "질소산화물이 자외선과 반응하여 오존 등을 생성합니다." },
+    { type: "text", q: "19. 런던형 스모그는 기온이 (     ) 겨울철 새벽이나 아침에 주로 발생한다.", a: "낮은 (4도 이하)", expl: "겨울철 난방(석탄) 증가와 기온 역전이 원인입니다." },
+    { type: "text", q: "20. LA형 스모그는 기온이 높은 여름철 (     )에 주로 발생하며, 산화적 반응이 특징이다.", a: "낮 (정오~오후)", expl: "자외선이 강한 시간대에 발생합니다." },
+    { type: "text", q: "21. 대기 오염 물질 중 1차 오염물질이 대기 중에서 화학반응을 일으켜 생성된 새로운 오염물질(예: 오존, PAN 등)을 무엇이라 하는가?", a: "2차 오염물질", expl: "빛이나 수분 등과 반응하여 생성됩니다." },
+    { type: "text", q: "22. 입자상 물질 중 크기가 0.1~1.0μm인 고체 입자로, 금속의 증기가 응축되어 생성되는 것은?", a: "Fume (퓸)", expl: "주로 용접 작업 등에서 발생합니다." },
+    { type: "text", q: "23. 액체 입자가 분산된 형태로 크기가 0.5~3.0μm이며, 황산(H2SO4) 등이 이에 해당하는 입자상 물질은?", a: "Mist (미스트)", expl: "액체 상태의 미세 입자입니다." },
+    { type: "text", q: "24. 인체에 가장 유해한 입자 크기는 (     )μm 범위이며, 이는 폐포 깊숙이 침착되거나 혈관으로 유입될 수 있다.", a: "0.1 ~ 2.5 (또는 0.5~5.0)", expl: "폐포에 침착되어 배출되지 않기 때문입니다." },
+    { type: "text", q: "25. 입자 크기가 10μm 이상인 먼지는 주로 호흡기 중 어느 부위에 포착되는가?", a: "상기도 (비강, 인후)", expl: "코털이나 점막에 걸러집니다." },
+    { type: "text", q: "26. 가스상 물질 중 물에 대한 용해도가 (     ) 가스는 상기도 점막에 녹아 자극을 주며, 대표적으로 SO2, NH3가 있다.", a: "높은", expl: "물에 잘 녹으면 들어오자마자 상기도 수분에 녹아 자극합니다." },
+    { type: "text", q: "27. 물에 잘 녹지 않아(용해도 낮음) 폐포 깊숙이 도달하여 폐부종 등을 유발하는 가스상 물질의 예로 포스겐(COCl2), NO2, 그리고 (     )이 있다.", a: "O3 (오존)", expl: "용해도가 낮으면 깊숙이 침투하여 심부 조직을 손상시킵니다." },
+    { type: "text", q: "28. 단순 질식제는 산소 분압을 저하시켜 질식을 유발하는 물질로 CO2, 메탄 등이 있고, 화학적 질식제는 체내 산소 운반이나 이용을 방해하는데 대표적으로 (     )가 있다.", a: "CO (일산화탄소)", expl: "CO는 헤모글로빈과 결합하여 산소 운반을 막습니다." },
+    { type: "text", q: "29. 일산화탄소(CO)는 헤모글로빈(Hb)과의 친화력이 산소보다 약 (     )배 강하다. (자료 수치 기준)", a: "210~300 (또는 약 250)", expl: "산소를 밀어내고 Hb와 강력하게 결합합니다." },
+    { type: "text", q: "30. 질소산화물(NOx) 중 독성이 강하고 적갈색을 띠며, 헤모글로빈과 결합하여 Methemoglobinemia(청색증)를 유발할 수 있는 물질은?", a: "NO2 (이산화질소)", expl: "NO보다 독성이 강하며 가시광선을 흡수해 적갈색을 띱니다." },
+    { type: "text", q: "31. 광화학적 오존(O3) 생성 반응에서 질소산화물(NO2)이 태양에너지(자외선)를 흡수하여 NO와 (     )로 분해되는 것이 반응의 시작이다.", a: "활성산소 (Atomic Oxygen, O)", expl: "분리된 산소 원자(O)가 산소 분자(O2)와 결합하여 오존(O3)을 만듭니다." },
+    { type: "text", q: "32. 대류권 오존 농도가 하루 중 가장 높게 나타나는 시간대는 대략 언제인가?", a: "오후 2시 (14시)", expl: "자외선이 가장 강한 정오 이후 반응이 축적되어 나타납니다." },
+    { type: "text", q: "33. 광화학 스모그의 주요 성분인 PAN은 (     )의 약자이다.", a: "Peroxyacylnitrate", expl: "강력한 산화제이자 눈 자극 물질입니다." },
+    { type: "text", q: "34. 2차 오염물질 생성에 관여하는 인자로 탄화수소(HC)와 질소산화물(NOx), 그리고 반드시 (     )이 필요하다.", a: "자외선 (UV)", expl: "광화학 반응의 에너지원입니다." },
+    { type: "text", q: "35. 고도가 올라갈수록 기온이 낮아져야 정상이나, 반대로 기온이 높아져 공기의 수직 확산이 억제되고 오염물질이 축적되는 현상은?", a: "기온역전", expl: "대기가 안정되어 오염물질이 갇히게 됩니다." },
+    { type: "text", q: "36. 기온역전 중 따뜻한 공기가 차가운 지면 위로 이동할 때 하층부가 냉각되어 발생하는 역전으로, 주로 런던 스모그와 관련된 것은?", a: "이류성 역전 (Advection inversion)", expl: "지표면 냉각에 의한 복사 역전과 구별됩니다." },
+    { type: "text", q: "37. 실내 공기 오염 물질 중 건축자재나 토양에서 방출되며, 폐암을 유발하는 방사성 가스는?", a: "라돈 (Radon, Rn)", expl: "자연 방사능 물질로 환기가 중요합니다." },
+    { type: "text", q: "38. 새집증후군의 주요 원인 물질로, 접착제나 단열재 등에서 방출되며 눈과 호흡기 자극을 유발하는 휘발성 유기화합물은?", a: "포름알데히드 (HCHO)", expl: "1급 발암물질이며 자극성이 강합니다." },
+    { 
+        type: "choice", 
+        q: "39. 다음 중 통상적인 정수장의 염소 소독 처리로는 완전히 제거되지 않아, 오존 살균이나 여과 등의 물리적 처리가 반드시 필요한 수인성 감염 병원체는?", 
+        a: ["1. 장티푸스균 (Salmonella Typhi)", "2. 이질아메바 (Entamoeba histolytica)", "3. 크립토스포리디움 (Cryptosporidium)", "4. 콜레라균 (Vibrio cholerae)", "5. A형 간염 바이러스 (HAV)"], 
+        c: 2, 
+        expl: "크립토스포리디움은 염소 내성이 강한 포낭을 형성하므로 오존 소독 등이 필요합니다." 
+    },
+    { type: "text", q: "40. 산성비(Acid rain)의 기준이 되는 pH 농도는 얼마 미만인가?", a: "5.6", expl: "대기 중 CO2가 포화되었을 때의 pH인 5.6보다 낮을 때를 말합니다." },
+    { type: "text", q: "41. 산성비의 주요 원인 물질은 대기 중의 SOx와 (     )이다.", a: "NOx (질소산화물)", expl: "황산과 질산을 생성하여 비를 산성화시킵니다." },
+    { type: "text", q: "42. 입자의 크기가 0.1μm 이하로 매우 작아 폐포에 부착되거나, 가스와 같이 거동하여 호흡을 통해 다시 밖으로 배출되기도 하는 입자상 물질의 명칭은 무엇인가?", a: "극미세먼지", expl: "거동이 기체 분자와 유사합니다." },
+    { type: "text", q: "43. 0.1~2.5μm 크기의 입자는 림프관이나 혈관 내로 침입할 수 있으며 (     ) 운동을 한다.", a: "브라운 (Brownian)", expl: "미세 입자의 무작위 운동입니다." },
+    { type: "text", q: "44. 대기 중의 아황산가스(SO2)가 식물에 미치는 영향으로 잎의 (     )과 엽맥 사이의 백색화가 나타난다.", a: "반점", expl: "식물 피해의 대표적인 증상입니다." },
+    { type: "text", q: "45. 일산화탄소(CO) 중독 시 치료를 위해 고압 (     ) 요법을 사용한다.", a: "산소 (O2)", expl: "혈중 CO를 빨리 밀어내기 위해 고압 산소를 투여합니다." },
+    { type: "text", q: "46. 물의 부영양화(Eutrophication)를 유발하는 주요 영양 염류 두 가지는 질소(N)와 (     )이다.", a: "인 (P)", expl: "조류의 과다 번식을 유발합니다." },
+    { type: "text", q: "47. 분변 오염의 지표로 사용되는 세균군은?", a: "대장균군 (Coliform group)", expl: "검출이 쉽고 분변 오염 가능성을 시사합니다." },
+    { type: "text", q: "48. 오존 살균은 염소 살균에 비해 살균력이 강하고 바이러스에도 효과적이지만, (     )이 없다는 단점이 있다.", a: "잔류성 (지속성)", expl: "소독 후 관로에서 재오염될 가능성이 있습니다." },
+    { type: "text", q: "49. 암모니아, 메틸메르캅탄 등과 함께 명시되어 있으며, 주로 ‘썩은 생선 비린내’를 유발하는 원인 물질로 알려진 질소 화합물의 약어(Abbreviation)는 무엇인가?", a: "TMA (또는 Trimethylamine)", expl: "악취방지법 지정 악취 물질 중 하나입니다." },
+    { type: "text", q: "50. 시안(CN) 화합물은 체내에서 (     ) 산화효소(Cytochrome oxidase)를 저해하여 내호흡을 억제한다.", a: "시토크롬 (Cytochrome)", expl: "세포 호흡을 차단하여 질식을 유발합니다." }
+    ];
+
+    let currentQuestion = 0;
+    // 사용자 답안 저장
+    let userAnswers = new Array(quizData.length).fill(null);
+    // 정답 여부 저장 (주관식/객관식 통합 관리)
+    let correctnessArr = new Array(quizData.length).fill(null);
+
+    const questionText = document.getElementById("question-text");
+    const optionsList = document.getElementById("options-list");
+    const inputArea = document.getElementById("input-area");
+    const textInput = document.getElementById("text-input");
+    const submitBtn = document.getElementById("submit-answer-btn");
+    const checkBtn = document.getElementById("check-answer-btn"); // 정답 확인 버튼
+    
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
+    const progress = document.getElementById("progress");
+    const quizBox = document.getElementById("quiz-box");
+    const resultScreen = document.getElementById("result-screen");
+    const finalScore = document.getElementById("final-score");
+    const scoreMessage = document.getElementById("score-message");
+
+    // 엔터키 입력 시 정답 확인
+    textInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter" && !submitBtn.disabled) {
+            checkTextAnswer();
+        }
+    });
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionText.innerText = q.q;
+        optionsList.innerHTML = "";
+        feedback.style.display = "none";
+        progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+        
+        prevBtn.style.display = (currentQuestion === 0) ? "none" : "block";
+
+        const qType = q.type || "choice";
+
+        if (qType === "text") {
+            // [주관식 모드]
+            optionsList.style.display = "none";
+            inputArea.style.display = "flex";
+            
+            // 이미 풀었거나 포기했던 문제라면 상태 복구
+            if (userAnswers[currentQuestion] !== null) {
+                if (userAnswers[currentQuestion] === "GIVE_UP") {
+                    textInput.value = "";
+                    textInput.placeholder = "포기한 문제입니다.";
+                } else {
+                    textInput.value = userAnswers[currentQuestion];
+                }
+                
+                textInput.disabled = true;
+                submitBtn.disabled = true;
+                checkBtn.disabled = true; // 버튼 비활성화
+                
+                showFeedbackText(correctnessArr[currentQuestion]);
+            } else {
+                // 안 푼 문제라면 초기화
+                textInput.value = "";
+                textInput.placeholder = "정답을 입력하세요";
+                textInput.disabled = false;
+                submitBtn.disabled = false;
+                checkBtn.disabled = false; // 버튼 활성화
+                
+                nextBtn.style.display = "none";
+                textInput.focus();
+            }
+
+        } else {
+            // [객관식 모드] (39번 문제 등)
+            optionsList.style.display = "block";
+            inputArea.style.display = "none";
+            
+            const answeredIndex = userAnswers[currentQuestion];
+            const isAnswered = answeredIndex !== null;
+
+            if (isAnswered) {
+                showFeedbackChoice(answeredIndex);
+                nextBtn.style.display = "block";
+                updateNextBtnText();
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            // 객관식 보기가 있다면 생성
+            if(q.a && Array.isArray(q.a)) {
+                q.a.forEach((option, index) => {
+                    const li = document.createElement("li");
+                    const btn = document.createElement("button");
+                    btn.innerText = option;
+                    
+                    if (isAnswered) {
+                        btn.disabled = true;
+                        if (index === q.c) btn.classList.add("correct");
+                        else if (index === answeredIndex && index !== q.c) btn.classList.add("wrong");
+                    } else {
+                        btn.onclick = () => checkChoiceAnswer(index, btn);
+                    }
+                    li.appendChild(btn);
+                    optionsList.appendChild(li);
+                });
+            }
+        }
+    }
+
+    // [New] 입력 없이 바로 정답 확인하는 함수
+    function showAnswerDirectly() {
+        // 포기한 것으로 처리
+        userAnswers[currentQuestion] = "GIVE_UP"; 
+        correctnessArr[currentQuestion] = false; // 오답 처리
+
+        textInput.disabled = true;
+        submitBtn.disabled = true;
+        checkBtn.disabled = true; 
+
+        // 오답 피드백 표시 (정답 보여줌)
+        showFeedbackText(false);
+    }
+
+    // 객관식 정답 체크 함수
+    function checkChoiceAnswer(selectedIndex, btnElement) {
+        const q = quizData[currentQuestion];
+        userAnswers[currentQuestion] = selectedIndex;
+        
+        const isCorrect = (selectedIndex === q.c);
+        correctnessArr[currentQuestion] = isCorrect;
+
+        // 버튼 스타일 업데이트를 위해 다시 로드하지 않고 직접 스타일 적용
+        const buttons = optionsList.getElementsByTagName("button");
+        for(let i=0; i<buttons.length; i++) {
+            buttons[i].disabled = true;
+            if(i === q.c) buttons[i].classList.add("correct");
+            else if(i === selectedIndex && !isCorrect) buttons[i].classList.add("wrong");
+        }
+
+        showFeedbackChoice(selectedIndex);
+        nextBtn.style.display = "block";
+        updateNextBtnText();
+    }
+
+    // 객관식 피드백 표시
+    function showFeedbackChoice(selectedIndex) {
+        const q = quizData[currentQuestion];
+        const isCorrect = (selectedIndex === q.c);
+        
+        if (isCorrect) {
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+        } else {
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+        }
+        feedback.style.display = "block";
+    }
+
+    // 주관식 정답 체크
+    function checkTextAnswer() {
+        const userVal = textInput.value.trim();
+        if (!userVal) return; 
+
+        userAnswers[currentQuestion] = userVal;
+        
+        const q = quizData[currentQuestion];
+        
+        const cleanUser = userVal.toLowerCase().replace(/\s+/g, "");
+        const originAns = q.a;
+        
+        // 정답 정규화 로직
+        let processedAns = originAns
+            .replace(/[\(\),\/+]/g, "|") 
+            .replace(/->/g, "|")         
+            .replace(/(A:|B:)/g, "|");   
+
+        const keywords = processedAns.split("|")
+            .map(k => k.toLowerCase().replace(/\s+/g, ""))
+            .filter(k => k.length > 0);
+
+        let isCorrect = false;
+
+        if (keywords.includes(cleanUser)) {
+            isCorrect = true;
+        } 
+        else if (cleanUser.length > 1 && originAns.toLowerCase().replace(/\s+/g, "").includes(cleanUser)) {
+             if (originAns.toLowerCase().replace(/[\(\),]/g, "").replace(/\s+/g, "") === cleanUser) {
+                 isCorrect = true;
+             }
+        }
+
+        correctnessArr[currentQuestion] = isCorrect;
+
+        textInput.disabled = true;
+        submitBtn.disabled = true;
+        checkBtn.disabled = true;
+
+        showFeedbackText(isCorrect);
+    }
+
+    // 주관식 피드백 표시
+    function showFeedbackText(isCorrect) {
+        const q = quizData[currentQuestion];
+        if (isCorrect) {
+            textInput.style.borderColor = "#4CAF50"; 
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+        } else {
+            textInput.style.borderColor = "#f44336"; 
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a}</strong> 입니다.<br>${q.expl}`;
+        }
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+        updateNextBtnText();
+    }
+
+    function updateNextBtnText() {
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "결과 보기";
+        } else {
+            nextBtn.innerText = "다음 문제 ➡️";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let finalScoreValue = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            if (correctnessArr[i]) finalScoreValue++;
+        }
+
+        quizBox.style.display = "none";
+        resultScreen.style.display = "block";
+        finalScore.innerText = `${finalScoreValue} / ${quizData.length}점`;
+        
+        if (finalScoreValue >= quizData.length * 0.8) {
+            scoreMessage.innerText = "합격권이야! 이대로만 하면 되겠어! 💊";
+        } else if (finalScoreValue >= quizData.length * 0.5) {
+            scoreMessage.innerText = "절반은 넘겼네. 조금만 더 외워보자!";
+        } else {
+            scoreMessage.innerText = "아직 많이 부족해. 다시 한 번 꼼꼼히 보자!";
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
