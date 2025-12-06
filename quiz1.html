@@ -14,12 +14,28 @@
         .options li { margin-bottom: 10px; }
         .options button { width: 100%; padding: 12px; font-size: 16px; text-align: left; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
         .options button:hover { background-color: #e8f5e9; }
+        
+        /* 정답/오답 스타일 */
         .options button.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
         .options button.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .options button.selected-wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; font-weight: bold; }
+
         .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
         .feedback strong { color: #d9534f; }
-        .next-btn { display: none; width: 100%; padding: 15px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 18px; margin-top: 20px; cursor: pointer; }
+        
+        /* 버튼 컨테이너 (좌우 배치) */
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        
+        .nav-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; display: none; }
+        
+        /* 이전 문제 버튼 (회색) */
+        .prev-btn { background-color: #6c757d; color: white; }
+        .prev-btn:hover { background-color: #5a6268; }
+
+        /* 다음 문제 버튼 (초록색) */
+        .next-btn { background-color: #4CAF50; color: white; }
         .next-btn:hover { background-color: #45a049; }
+
         .result-screen { text-align: center; display: none; }
         .score { font-size: 40px; font-weight: bold; color: #4CAF50; margin: 20px 0; }
     </style>
@@ -33,14 +49,18 @@
         <div class="question" id="question-text">문제 로딩중...</div>
         <ul class="options" id="options-list"></ul>
         <div class="feedback" id="feedback"></div>
-        <button class="next-btn" id="next-btn" onclick="nextQuestion()">다음 문제</button>
+        
+        <div class="btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">⬅️ 이전 문제</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 문제 ➡️</button>
+        </div>
     </div>
 
     <div class="result-screen" id="result-screen">
         <h1>수고했습니다! 자네의 점수는?</h1>
         <div class="score" id="final-score"></div>
         <p id="score-message"></p>
-        <button class="next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+        <button class="nav-btn next-btn" style="display:block; width:100%" onclick="location.reload()">다시 풀기</button>
     </div>
 </div>
 
@@ -79,12 +99,14 @@
     ];
 
     let currentQuestion = 0;
-    let score = 0;
+    // 사용자 답안 기록용 배열 (초기값 null)
+    let userAnswers = new Array(quizData.length).fill(null);
 
     const questionText = document.getElementById("question-text");
     const optionsList = document.getElementById("options-list");
     const feedback = document.getElementById("feedback");
     const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
     const progress = document.getElementById("progress");
     const quizBox = document.getElementById("quiz-box");
     const resultScreen = document.getElementById("result-screen");
@@ -95,21 +117,69 @@
         const q = quizData[currentQuestion];
         questionText.innerText = q.q;
         optionsList.innerHTML = "";
-        feedback.style.display = "none";
-        nextBtn.style.display = "none";
+        
+        // 버튼 표시 관리
         progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+        
+        // 이전 버튼: 1번 문제에서는 숨김, 그 외에는 보임
+        if (currentQuestion === 0) {
+            prevBtn.style.display = "none";
+        } else {
+            prevBtn.style.display = "block";
+        }
 
+        // 이미 푼 문제인지 확인
+        const answeredIndex = userAnswers[currentQuestion];
+        const isAnswered = answeredIndex !== null;
+
+        if (isAnswered) {
+            // 이미 푼 경우: 결과 화면 바로 보여줌
+            feedback.style.display = "block";
+            nextBtn.style.display = "block";
+            if (currentQuestion === quizData.length - 1) {
+                 nextBtn.innerText = "결과 보기";
+            } else {
+                 nextBtn.innerText = "다음 문제 ➡️";
+            }
+            
+            // 피드백 텍스트 복원
+            if (answeredIndex === q.c) {
+                feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+            } else {
+                feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+            }
+        } else {
+            // 안 푼 경우: 초기 상태
+            feedback.style.display = "none";
+            nextBtn.style.display = "none";
+        }
+
+        // 보기 버튼 생성
         q.a.forEach((option, index) => {
             const li = document.createElement("li");
             const btn = document.createElement("button");
             btn.innerText = option;
-            btn.onclick = () => checkAnswer(index, btn);
+            
+            if (isAnswered) {
+                btn.disabled = true; // 이미 풀었으니 비활성화
+                if (index === q.c) {
+                    btn.classList.add("correct"); // 정답 초록색
+                } else if (index === answeredIndex && index !== q.c) {
+                    btn.classList.add("wrong"); // 내가 고른 오답 빨간색
+                }
+            } else {
+                btn.onclick = () => checkAnswer(index, btn);
+            }
+            
             li.appendChild(btn);
             optionsList.appendChild(li);
         });
     }
 
     function checkAnswer(selectedIndex, btn) {
+        // 답안 기록 저장
+        userAnswers[currentQuestion] = selectedIndex;
+        
         const q = quizData[currentQuestion];
         const buttons = optionsList.querySelectorAll("button");
         
@@ -119,7 +189,6 @@
         if (selectedIndex === q.c) {
             btn.classList.add("correct");
             feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
-            score++;
         } else {
             btn.classList.add("wrong");
             buttons[q.c].classList.add("correct");
@@ -128,6 +197,17 @@
 
         feedback.style.display = "block";
         nextBtn.style.display = "block";
+        
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "결과 보기";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
     }
 
     function nextQuestion() {
@@ -140,13 +220,21 @@
     }
 
     function showResult() {
+        // 최종 점수 계산 (배열 순회)
+        let finalScoreValue = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            if (userAnswers[i] === quizData[i].c) {
+                finalScoreValue++;
+            }
+        }
+
         quizBox.style.display = "none";
         resultScreen.style.display = "block";
-        finalScore.innerText = `${score} / ${quizData.length}점`;
+        finalScore.innerText = `${finalScoreValue} / ${quizData.length}점`;
         
-        if (score >= 25) {
+        if (finalScoreValue >= 25) {
             scoreMessage.innerText = "대단하네! 이 정도면 국시 예방약학은 걱정 없겠어!";
-        } else if (score >= 15) {
+        } else if (finalScoreValue >= 15) {
             scoreMessage.innerText = "잘했네! 틀린 부분만 다시 복습하면 완벽할 걸세.";
         } else {
             scoreMessage.innerText = "조금 더 분발하게. 해냄 3페이지를 다시 꼼꼼히 읽어보게나.";
