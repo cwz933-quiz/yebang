@@ -81,10 +81,6 @@
 </div>
 
 <script>
-    // 💡 [문제 데이터 작성법]
-    // 1. 객관식: 기존과 동일 (type 생략 가능 또는 "choice")
-    // 2. 주관식: type: "text" 추가, a: "정답문자열" (보기 배열 아님!)
-    
     const quizData = [
     {
         type: "text",
@@ -420,9 +416,9 @@
 
 
     let currentQuestion = 0;
-    // 사용자 답안 저장 (객관식은 index, 주관식은 입력한 문자열)
+    // 사용자 답안 저장
     let userAnswers = new Array(quizData.length).fill(null);
-    // 주관식 정답 여부 저장 (true/false)
+    // 주관식 정답 여부 저장
     let textCorrectness = new Array(quizData.length).fill(null);
 
     const questionText = document.getElementById("question-text");
@@ -454,10 +450,8 @@
         feedback.style.display = "none";
         progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
         
-        // 이전 버튼 관리
         prevBtn.style.display = (currentQuestion === 0) ? "none" : "block";
 
-        // 문제 타입 확인 (기본값은 choice)
         const qType = q.type || "choice";
 
         if (qType === "text") {
@@ -465,7 +459,6 @@
             optionsList.style.display = "none";
             inputArea.style.display = "flex";
             
-            // 이미 푼 경우 기록 복원
             if (userAnswers[currentQuestion] !== null) {
                 textInput.value = userAnswers[currentQuestion];
                 textInput.disabled = true;
@@ -480,7 +473,7 @@
             }
 
         } else {
-            // [객관식 모드]
+            // [객관식 모드] - 데이터에 객관식 문제가 추가될 경우를 대비
             optionsList.style.display = "block";
             inputArea.style.display = "none";
             
@@ -493,66 +486,74 @@
                 nextBtn.style.display = "none";
             }
 
-            q.a.forEach((option, index) => {
-                const li = document.createElement("li");
-                const btn = document.createElement("button");
-                btn.innerText = option;
-                
-                if (isAnswered) {
-                    btn.disabled = true;
-                    if (index === q.c) btn.classList.add("correct");
-                    else if (index === answeredIndex && index !== q.c) btn.classList.add("wrong");
-                } else {
-                    btn.onclick = () => checkChoiceAnswer(index, btn);
-                }
-                li.appendChild(btn);
-                optionsList.appendChild(li);
-            });
-        }
-    }
-
-    // 객관식 정답 체크
-    function checkChoiceAnswer(selectedIndex, btn) {
-        userAnswers[currentQuestion] = selectedIndex;
-        showFeedbackChoice(selectedIndex);
-    }
-
-    // 객관식 피드백 표시
-    function showFeedbackChoice(selectedIndex) {
-        const q = quizData[currentQuestion];
-        const buttons = optionsList.querySelectorAll("button");
-        buttons.forEach(b => b.disabled = true);
-
-        // 현재 화면의 버튼 상태 업데이트 (버튼이 존재할 때만)
-        if (buttons.length > 0) {
-            if (selectedIndex === q.c) {
-                buttons[selectedIndex].classList.add("correct");
-                feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
-            } else {
-                buttons[selectedIndex].classList.add("wrong");
-                buttons[q.c].classList.add("correct");
-                feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+            // 객관식 보기가 있다면 생성
+            if(q.a && Array.isArray(q.a)) {
+                q.a.forEach((option, index) => {
+                    const li = document.createElement("li");
+                    const btn = document.createElement("button");
+                    btn.innerText = option;
+                    
+                    if (isAnswered) {
+                        btn.disabled = true;
+                        if (index === q.c) btn.classList.add("correct");
+                        else if (index === answeredIndex && index !== q.c) btn.classList.add("wrong");
+                    } else {
+                        btn.onclick = () => checkChoiceAnswer(index, btn);
+                    }
+                    li.appendChild(btn);
+                    optionsList.appendChild(li);
+                });
             }
         }
-        
-        feedback.style.display = "block";
-        nextBtn.style.display = "block";
-        updateNextBtnText();
     }
 
-    // 주관식 정답 체크
+    // 주관식 정답 체크 (핵심 키워드 매칭 로직 적용)
     function checkTextAnswer() {
         const userVal = textInput.value.trim();
-        if (!userVal) return; // 빈칸이면 반응 X
+        if (!userVal) return; 
 
         userAnswers[currentQuestion] = userVal;
         
         const q = quizData[currentQuestion];
-        // 정답 비교 (대소문자 무시, 공백 제거 후 비교)
-        const cleanUser = userVal.toLowerCase().replace(/\s/g, "");
-        const cleanAns = q.a.toLowerCase().replace(/\s/g, "");
+        
+        // 1. 사용자 입력 정규화 (소문자 변환, 공백 제거)
+        const cleanUser = userVal.toLowerCase().replace(/\s+/g, "");
+        const originAns = q.a;
+        
+        // 2. 정답 문자열을 분해하여 키워드 리스트 생성
+        // 괄호(), 콤마(,), 슬래시(/), 더하기(+) 등을 구분자로 사용
+        // 예: "파괴점 (불연속점, Breakpoint)" -> ["파괴점", "불연속점", "breakpoint"]
+        let processedAns = originAns
+            .replace(/[\(\),\/+]/g, "|") // 구분자를 파이프로 변경
+            .replace(/->/g, "|")         // 화살표 제거
+            .replace(/(A:|B:)/g, "|");   // A:, B: 라벨 제거
 
-        const isCorrect = (cleanUser === cleanAns);
+        // 배열로 만들고 정규화
+        const keywords = processedAns.split("|")
+            .map(k => k.toLowerCase().replace(/\s+/g, ""))
+            .filter(k => k.length > 0);
+
+        // 3. 정답 판별: 키워드 중 하나라도 정확히 일치하면 정답
+        let isCorrect = false;
+
+        // Case A: 키워드 리스트에 사용자 입력이 정확히 포함된 경우
+        if (keywords.includes(cleanUser)) {
+            isCorrect = true;
+        } 
+        // Case B: 혹시 사용자가 전체 풀네임을 썼는데 띄어쓰기만 틀린 경우를 대비
+        else if (cleanUser.length > 1 && originAns.toLowerCase().replace(/\s+/g, "").includes(cleanUser)) {
+             // 단, 너무 짧은 단어(1글자)가 포함되는 건 오답 처리 (예: '점' 입력 시 '파괴점' 인정 안함)
+             // 여기서 좀 더 엄격하게 하려면 Case A만 써도 됨. 
+             // 하지만 "염소소독" 같은 복합어 처리를 위해 남겨둠.
+             // 안전하게 하기 위해, 입력값이 키워드 중 하나의 '일부분'이 아니라,
+             // 정답 전체 문자열에서 매칭되는지 확인 (단, 2글자 이상)
+             // 여기서는 키워드 매칭(Case A)을 우선시하되, 
+             // 사용자가 "파괴점불연속점" 같이 다 붙여 쓴 경우도 정답 처리
+             if (originAns.toLowerCase().replace(/[\(\),]/g, "").replace(/\s+/g, "") === cleanUser) {
+                 isCorrect = true;
+             }
+        }
+
         textCorrectness[currentQuestion] = isCorrect;
 
         textInput.disabled = true;
@@ -565,10 +566,10 @@
     function showFeedbackText(isCorrect) {
         const q = quizData[currentQuestion];
         if (isCorrect) {
-            textInput.style.borderColor = "#4CAF50"; // 초록 테두리
+            textInput.style.borderColor = "#4CAF50"; 
             feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
         } else {
-            textInput.style.borderColor = "#f44336"; // 빨강 테두리
+            textInput.style.borderColor = "#f44336"; 
             feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a}</strong> 입니다.<br>${q.expl}`;
         }
         feedback.style.display = "block";
@@ -603,14 +604,7 @@
     function showResult() {
         let finalScoreValue = 0;
         for (let i = 0; i < quizData.length; i++) {
-            const q = quizData[i];
-            const qType = q.type || "choice";
-
-            if (qType === "text") {
-                if (textCorrectness[i]) finalScoreValue++;
-            } else {
-                if (userAnswers[i] === q.c) finalScoreValue++;
-            }
+            if (textCorrectness[i]) finalScoreValue++;
         }
 
         quizBox.style.display = "none";
