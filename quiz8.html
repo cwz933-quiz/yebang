@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예방약학 해냄 p4 실전 50제</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #ffebee; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; }
+        
+        /* 메인으로 가기 버튼 */
+        .home-btn { display: inline-block; text-decoration: none; color: #666; font-size: 14px; margin-bottom: 20px; padding: 8px 12px; background-color: #f1f3f5; border-radius: 20px; transition: all 0.2s; font-weight: bold; }
+        .home-btn:hover { background-color: #e9ecef; color: #333; }
+
+        h1 { font-size: 20px; color: #c62828; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e57373; padding-bottom: 10px; margin-top: 0; }
+        .progress { text-align: right; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; line-height: 1.5; word-break: keep-all; }
+        
+        /* 주관식 입력 스타일 */
+        .input-container { display: flex; gap: 10px; margin-bottom: 10px; }
+        .input-answer { flex: 1; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; outline: none; transition: border 0.3s; }
+        .input-answer:focus { border-color: #e57373; }
+        
+        /* 버튼 스타일 */
+        .submit-btn { padding: 12px 15px; background-color: #ef5350; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .submit-btn:hover { background-color: #d32f2f; }
+        .submit-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* 정답 확인(포기) 버튼 스타일 */
+        .check-btn { padding: 12px 15px; background-color: #607d8b; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .check-btn:hover { background-color: #455a64; }
+        .check-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
+        .feedback strong { color: #d9534f; }
+        
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; display: none; }
+        .prev-btn { background-color: #90a4ae; color: white; }
+        .next-btn { background-color: #ef5350; color: white; }
+        
+        .result-screen { text-align: center; display: none; }
+        .score { font-size: 40px; font-weight: bold; color: #c62828; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <a href="index.html" class="home-btn">🏠 메인 메뉴로</a>
+
+    <div id="quiz-box">
+        <h1>☢️ 해냄 p4 핵심 50제 (발암/금속/해독)</h1>
+        <div class="progress" id="progress">문제 1 / 50</div>
+        <div class="question" id="question-text">문제 로딩중...</div>
+        
+        <div class="input-container" id="input-area">
+            <input type="text" class="input-answer" id="text-input" placeholder="정답을 입력하세요">
+            <button class="submit-btn" id="submit-answer-btn" onclick="checkTextAnswer()">제출</button>
+            <button class="check-btn" id="check-answer-btn" onclick="showAnswerDirectly()">정답 확인</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">⬅️ 이전 문제</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 문제 ➡️</button>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1>수고했습니다! 자네의 점수는?</h1>
+        <div class="score" id="final-score"></div>
+        <p id="score-message"></p>
+        <div class="btn-container">
+            <button class="nav-btn next-btn" style="display:block; background-color:#666;" onclick="location.href='index.html'">메인으로</button>
+            <button class="nav-btn next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 해냄 p4 발암물질, 금속독성, 농약, 해독제 50제 데이터
+    const quizData = [
+        // [발암물질]
+        { q: "1. 체내에서 대사적 활성화를 거쳐야만 발암성을 나타내는 물질을 통칭하는 용어는?", a: "간접 발암물질 (Indirect carcinogen / Procarcinogen)", expl: "직접 발암물질(Direct)과 달리 CYP 등에 의한 대사 활성화가 필요합니다." },
+        { q: "2. 곰팡이 독소의 일종으로, CYP3A4에 의해 에폭사이드가 되어 간암을 유발하는 강력한 발암물질은?", a: "Aflatoxin B1 (아플라톡신)", expl: "Aspergillus flavus에서 유래하며 간세포암을 유발합니다." },
+        { q: "3. 플라스틱 제조 원료로 사용되며, 간 혈관육종(Hemangiosarcoma)을 유발하는 대표적인 물질은?", a: "Vinyl chloride (비닐클로라이드)", expl: "CYP2E1에 의해 대사되어 DNA에 부가체를 형성합니다." },
+        { q: "4. 담배 연기, 탄 고기 등에 존재하며 CYP1A1에 의해 Diol epoxide가 되어 폐암을 유발하는 다환방향족탄화수소는?", a: "Benzo(a)pyrene (벤조피렌 / B(a)P)", expl: "AhR 수용체에 결합하여 CYP1A1을 유도하고 스스로 발암물질이 됩니다." },
+        { q: "5. 소철(Cycad)의 독성 성분으로 장내 세균의 β-glucosidase에 의해 활성화되어 발암성을 띠는 물질은?", a: "Cycasin (사이카신)", expl: "가수분해되어 Methylazoxymethanol이 되어 발암성을 나타냅니다." },
+        { q: "6. 2차 발암물질(Promoter)의 대표적인 예로, PKC를 활성화하여 암 진행을 촉진하는 물질은?", a: "Phorbol ester (포볼에스테르 / TPA)", expl: "자체적인 돌연변이원성은 없으나 발암 과정을 촉진합니다." },
+        
+        // [돌연변이원 & 식품 독소]
+        { q: "7. 아질산염(Nitrite)과 아민이 산성 조건(위장)에서 반응하여 생성되는 발암물질은?", a: "Nitrosamine (니트로사민)", expl: "햄, 소시지 등의 발색제인 아질산염이 2급 아민과 반응하여 생성됩니다." },
+        { q: "8. 니트로사민의 생성을 억제하는 대표적인 영양소는?", a: "Vitamin C (Ascorbic acid / 비타민 C)", expl: "비타민 C나 E는 아질산염의 환원을 막아 니트로사민 생성을 억제합니다." },
+        { q: "9. 고사리에 들어있는 발암물질로 방광암이나 위암을 유발하는 성분은?", a: "Ptaquiloside (타킬로사이드)", expl: "가축의 방광암이나 인간의 위암 원인이 될 수 있습니다." },
+        { q: "10. 육류를 고온 조리하거나 태울 때 트립토판의 열분해로 생성되는 발암물질군은?", a: "Heterocyclic amine (헤테로사이클릭아민 / HCA / Trp-P-1)", expl: "단백질의 아미노산이 고열에 의해 변성되어 생성됩니다." },
+
+        // [중금속 독성 - 납(Pb)]
+        { q: "11. 납(Pb)이 헴(Heme) 합성을 저해할 때 억제하는 효소 두 가지 중, 세포질에 존재하는 효소는?", a: "ALA dehydratase (ALA 탈수소효소)", expl: "이로 인해 소변으로 ALA 배설이 증가합니다. (또 다른 효소는 Ferrochelatase)" },
+        { q: "12. 납 중독 시 혈액 도말 검사에서 적혈구 내에 관찰되는 특징적인 병변은?", a: "Basophilic stippling (호염기성 반점)", expl: "RNA 응집으로 인해 적혈구 내에 파란 반점이 보입니다." },
+        { q: "13. 납 중독으로 인한 말초신경(요골신경) 마비로 손목이 처지는 증상을 무엇이라 하는가?", a: "Wrist drop (수근하수)", expl: "납은 운동 신경 마비를 주로 유발합니다." },
+        
+        // [중금속 독성 - 카드뮴(Cd)]
+        { q: "14. 카드뮴(Cd)이 체내에 들어왔을 때 간과 신장에서 결합하여 독성을 줄여주기도 하는 저분자 단백질은?", a: "Metallothionein (메탈로티오네인 / MT)", expl: "Cysteine이 풍부하여 중금속과 강하게 결합합니다." },
+        { q: "15. 카드뮴 만성 중독으로 인해 근위세뇨관 재흡수 장애가 발생하여 소변으로 배설되는 진단 지표 단백질은?", a: "Beta2-microglobulin (β2-마이크로글로불린)", expl: "세뇨관 손상의 조기 지표입니다." },
+        { q: "16. 카드뮴 중독으로 칼슘 대사 이상이 생겨 뼈가 물러지고 통증이 심한 병의 이름은?", a: "Itai-itai disease (이타이이타이병)", expl: "골연화증과 신장 장애가 주 증상입니다." },
+
+        // [중금속 독성 - 수은(Hg), 비소(As), 크롬(Cr)]
+        { q: "17. 유기수은(Methylmercury) 중독으로 발생한 대표적인 공해병은?", a: "Minamata disease (미나마타병)", expl: "중추신경계 손상, 시야 협착, 감각 이상 등이 특징입니다." },
+        { q: "18. 무기수은(HgCl2 등)이 주로 손상을 입히는 장기는?", a: "Kidney (신장 / 콩팥)", expl: "유기수은은 뇌(CNS), 무기수은은 신장(근위세뇨관)이 주 표적입니다." },
+        { q: "19. 비소(As) 만성 중독으로 하지 말단의 혈관이 괴사하여 검게 변하는 병은?", a: "Blackfoot disease (흑색각피증 / 흑족병)", expl: "대만 등 식수 오염 지역에서 발생한 말초혈관 질환입니다." },
+        { q: "20. 비소 중독 시 손톱에 나타나는 특징적인 흰 가로줄 무늬의 이름은?", a: "Mee's line (미스라인)", expl: "비소가 케라틴과 결합하여 나타나는 증상입니다." },
+        { q: "21. 크롬(Cr) 중 독성이 강하고 세포막 투과가 용이하여 폐암을 유발하는 산화수는?", a: "Hexavalent Cr (6가 크롬 / Cr6+)", expl: "3가 크롬은 필수 미량원소이나, 6가 크롬은 발암물질입니다." },
+        { q: "22. 산화아연(ZnO) 흄 등을 흡입했을 때 발생하는, 오한과 발열을 동반한 감기 몸살 같은 증상은?", a: "Metal fume fever (금속열)", expl: "용접공 등에서 주로 발생하며 일시적입니다." },
+
+        // [필수 미량원소 결핍 및 과잉]
+        { q: "23. 구리(Cu) 배설 장애로 간과 뇌(렌즈핵)에 구리가 축적되는 유전 질환은?", a: "Wilson's disease (윌슨병)", expl: "Ceruloplasmin 합성 저하로 담즙 배설이 안 되어 축적됩니다." },
+        { q: "24. 셀레늄(Se) 결핍 시 발생하는 울혈성 심근장애 질환은?", a: "Keshan disease (케샨병)", expl: "Glutathione peroxidase의 구성 성분인 셀레늄 부족 시 발생합니다." },
+
+        // [농약 독성]
+        { q: "25. 유기염소계 살충제(DDT 등)가 신경계에 작용하는 기전은 신경막의 어떤 채널을 방해하기 때문인가?", a: "Na+ channel (나트륨 채널)", expl: "Na+ 채널이 닫히는 것을 방해하여 반복적인 신경 흥분을 유발합니다." },
+        { q: "26. 유기인계(Organophosphate) 농약의 주된 독성 기전은 무엇의 비가역적 억제인가?", a: "AChE (Acetylcholinesterase / 아세틸콜린 분해효소)", expl: "AChE를 인산화시켜 비가역적으로 억제, 아세틸콜린을 축적시킵니다." },
+        { q: "27. 유기인계 농약 중독 시 사용하는 해독제 중, 인산화된 효소를 재생(Dephosphorylation)시키는 약물은?", a: "2-PAM (Pralidoxime)", expl: "노화(Aging)가 일어나기 전에 투여해야 효과가 있습니다." },
+        { q: "28. 카바메이트(Carbamate) 살충제 중독 시에는 사용하지 않으며, 오히려 독성을 악화시킬 수 있는 해독제는?", a: "2-PAM (Pralidoxime)", expl: "카바메이트 중독은 가역적이므로 아트로핀만 사용합니다." },
+        { q: "29. 제초제 파라콰트(Paraquat)가 표적 장기인 폐에서 독성을 나타내는 기전은?", a: "Redox cycling (산화환원 순환 / 활성산소 생성)", expl: "지속적으로 활성산소를 만들어 폐 섬유화를 유발합니다." },
+        { q: "30. 파라콰트 중독 시 이것을 공급하면 라디칼 생성이 폭발적으로 증가하여 사망에 이른다. 무엇인가?", a: "Oxygen (산소)", expl: "산소 공급은 금기 사항입니다." },
+
+        // [유기용제 독성]
+        { q: "31. 벤젠(Benzene) 만성 노출 시 골수 독성으로 인해 발생하는 대표적인 혈액 질환은?", a: "Leukemia (백혈병 / 재생불량성 빈혈)", expl: "조혈모세포에 독성을 나타냅니다." },
+        { q: "32. 벤젠 노출의 생물학적 모니터링 지표로 소변에서 검출되는 대사체는?", a: "Phenol (페놀)", expl: "벤젠은 체내에서 페놀 등으로 대사되어 배설됩니다." },
+        { q: "33. 톨루엔(Toluene) 노출 시 소변으로 배설되는 대표적인 대사체는?", a: "Hippuric acid (마뇨산)", expl: "톨루엔 -> 벤조산 -> 글리신 포합 -> 마뇨산 경로를 따릅니다." },
+        { q: "34. 메탄올(Methanol)이 체내에서 대사되어 시신경 손상과 대사성 산증을 유발하는 물질은?", a: "Formic acid (포름산 / 개미산)", expl: "포름산이 시신경에 축적되어 실명을 유발합니다." },
+        { q: "35. 이황화탄소(CS2) 만성 중독 시 나타나는 특징적인 안과 질환은?", a: "Retinopathy (망막박리 / 미세동맥류)", expl: "혈관 독성으로 인해 망막에 미세동맥류가 생깁니다." },
+
+        // [해독제]
+        { q: "36. 철(Fe) 급성 중독 시 사용하는 킬레이트 해독제는?", a: "Deferoxamine (데페록사민)", expl: "철과 특이적으로 결합하여 배설시킵니다." },
+        { q: "37. 구리(Cu), 납(Pb), 수은(Hg) 중독, 특히 윌슨병 치료에 사용하는 경구용 해독제는?", a: "Penicillamine (페니실라민)", expl: "페니실린의 분해 산물로 중금속과 결합합니다." },
+        { q: "38. 비소, 수은, 납 등의 중독에 사용하며, 기름에 녹여 근육주사(IM)로 투여하는 해독제는?", a: "BAL (Dimercaprol / 디메르카프롤)", expl: "SH기를 2개 가지고 있어 중금속과 결합합니다. (British Anti-Lewisite)" },
+        { q: "39. 시안화물(Cyanide) 중독 시 메트헤모글로빈을 형성하여 독성을 줄이기 위해 투여하는 약물은?", a: "Sodium nitrite (아질산나트륨)", expl: "MetHb는 시안과 결합하여 CyanmetHb를 형성, 세포 호흡을 보호합니다." },
+        { q: "40. 시안화물 중독 치료의 2단계로, 시안이온을 무독한 SCN-(Thiocyanate)으로 전환시키는 약물은?", a: "Sodium thiosulfate (티오황산나트륨)", expl: "Rhodanese 효소의 작용을 돕습니다." },
+        { q: "41. 아세트아미노펜(AAP) 과량 복용 시 고갈된 글루타치온을 보충하기 위해 투여하는 약물은?", a: "NAC (N-acetylcysteine)", expl: "시스테인을 공급하여 GSH 합성을 돕습니다." },
+        { q: "42. 메탄올이나 에틸렌글리콜 중독 시 알코올 탈수소효소(ADH)를 경쟁적으로 저해하기 위해 투여하는 것은?", a: "Ethanol (에탄올 / Fomepizole)", expl: "독성 대사체(포름산 등) 생성을 억제합니다." },
+        { q: "43. 벤조디아제핀(BZD)계 약물 과다 복용 시 사용하는 길항제는?", a: "Flumazenil (플루마제닐)", expl: "BZD 수용체에 경쟁적으로 길항합니다." },
+        { q: "44. 아편(Opioid)류 약물 과다 복용 시 호흡 억제를 되돌리기 위해 사용하는 길항제는?", a: "Naloxone (날록손)", expl: "Opioid 수용체 길항제입니다." },
+        { q: "45. 와파린(Warfarin) 과다 복용으로 인한 출혈 시 투여하는 해독제는?", a: "Vitamin K (비타민 K)", expl: "와파린은 비타민 K 의존성 응고인자 생성을 억제하므로 이를 보충합니다." },
+        { q: "46. 아이소니아지드(INAH) 복용으로 인한 신경 독성을 막기 위해 투여하는 비타민은?", a: "Pyridoxine (Vitamin B6 / 피리독신)", expl: "INAH는 B6 배설을 촉진합니다." },
+        { q: "47. 납 중독 시 뼈에 축적된 납을 제거하기 위해 사용하는 해독제는?", a: "Ca-EDTA (EDTA)", expl: "이미 뼈에 침착된 납을 유리시켜 배설합니다." },
+        { q: "48. 메트헤모글로빈혈증(MetHb) 치료제로 사용하는 환원제는?", a: "Methylene blue (메틸렌블루)", expl: "NADPH-MetHb reductase를 도와 MetHb를 환원시킵니다." },
+        { q: "49. 복어독(Tetrodotoxin)의 독성 기전은?", a: "Na+ channel blocker (나트륨 채널 차단)", expl: "신경 전도를 차단하여 호흡 마비를 유발합니다." },
+        { q: "50. 유기인계, Carbamate계 농약 중독 시 공통적으로 사용할 수 있는 무스카린 수용체 차단제는?", a: "Atropine (아트로핀)", expl: "부교감신경 과흥분 증상(침분비, 서맥 등)을 완화합니다." }
+    ];
+
+    let currentQuestion = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+    let correctnessArr = new Array(quizData.length).fill(null);
+
+    const questionText = document.getElementById("question-text");
+    const inputArea = document.getElementById("input-area");
+    const textInput = document.getElementById("text-input");
+    const submitBtn = document.getElementById("submit-answer-btn");
+    const checkBtn = document.getElementById("check-answer-btn");
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
+    const progress = document.getElementById("progress");
+    const quizBox = document.getElementById("quiz-box");
+    const resultScreen = document.getElementById("result-screen");
+    const finalScore = document.getElementById("final-score");
+    const scoreMessage = document.getElementById("score-message");
+
+    textInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter" && !submitBtn.disabled) {
+            checkTextAnswer();
+        }
+    });
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionText.innerText = q.q;
+        feedback.style.display = "none";
+        progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+        prevBtn.style.display = (currentQuestion === 0) ? "none" : "block";
+
+        if (userAnswers[currentQuestion] !== null) {
+            if (userAnswers[currentQuestion] === "GIVE_UP") {
+                textInput.value = "";
+                textInput.placeholder = "포기한 문제입니다.";
+            } else {
+                textInput.value = userAnswers[currentQuestion];
+            }
+            textInput.disabled = true;
+            submitBtn.disabled = true;
+            checkBtn.disabled = true;
+            showFeedbackText(correctnessArr[currentQuestion]);
+        } else {
+            textInput.value = "";
+            textInput.placeholder = "정답을 입력하세요";
+            textInput.disabled = false;
+            submitBtn.disabled = false;
+            checkBtn.disabled = false;
+            nextBtn.style.display = "none";
+            textInput.focus();
+        }
+    }
+
+    function showAnswerDirectly() {
+        userAnswers[currentQuestion] = "GIVE_UP"; 
+        correctnessArr[currentQuestion] = false; 
+        textInput.disabled = true;
+        submitBtn.disabled = true;
+        checkBtn.disabled = true; 
+        showFeedbackText(false);
+    }
+
+    function checkTextAnswer() {
+        const userVal = textInput.value.trim();
+        if (!userVal) return; 
+
+        userAnswers[currentQuestion] = userVal;
+        const q = quizData[currentQuestion];
+        
+        const cleanUser = userVal.toLowerCase().replace(/\s+/g, "");
+        const originAns = q.a;
+        
+        let processedAns = originAns
+            .replace(/[\(\),\/+]/g, "|") 
+            .replace(/->/g, "|")         
+            .replace(/(A:|B:)/g, "|");   
+
+        const keywords = processedAns.split("|")
+            .map(k => k.toLowerCase().replace(/\s+/g, ""))
+            .filter(k => k.length > 0);
+
+        let isCorrect = false;
+        if (keywords.includes(cleanUser)) {
+            isCorrect = true;
+        } else {
+            for (let key of keywords) {
+                if (key.length >= 2 && (cleanUser.includes(key) || key.includes(cleanUser))) {
+                    isCorrect = true;
+                    break;
+                }
+            }
+        }
+
+        correctnessArr[currentQuestion] = isCorrect;
+        textInput.disabled = true;
+        submitBtn.disabled = true;
+        checkBtn.disabled = true;
+        showFeedbackText(isCorrect);
+    }
+
+    function showFeedbackText(isCorrect) {
+        const q = quizData[currentQuestion];
+        if (isCorrect) {
+            textInput.style.borderColor = "#4CAF50"; 
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+        } else {
+            textInput.style.borderColor = "#f44336"; 
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a}</strong> 입니다.<br>${q.expl}`;
+        }
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+        updateNextBtnText();
+    }
+
+    function updateNextBtnText() {
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "결과 보기";
+        } else {
+            nextBtn.innerText = "다음 문제 ➡️";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let finalScoreValue = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            if (correctnessArr[i]) finalScoreValue++;
+        }
+
+        quizBox.style.display = "none";
+        resultScreen.style.display = "block";
+        finalScore.innerText = `${finalScoreValue} / ${quizData.length}점`;
+        
+        if (finalScoreValue >= quizData.length * 0.9) {
+            scoreMessage.innerText = "독성학 완벽 마스터! 국시 수석 가자! 🎓";
+        } else if (finalScoreValue >= quizData.length * 0.7) {
+            scoreMessage.innerText = "훌륭해! 해독제랑 농약 기전만 복습하자! 💊";
+        } else {
+            scoreMessage.innerText = "4페이지 표 암기가 시급해! 다시 외우고 오자! 📚";
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
