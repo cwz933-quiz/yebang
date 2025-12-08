@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예방약학(독성학) 핵심 50제</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; }
+        
+        /* 메인으로 가기 버튼 */
+        .home-btn { display: inline-block; text-decoration: none; color: #666; font-size: 14px; margin-bottom: 20px; padding: 8px 12px; background-color: #f1f3f5; border-radius: 20px; transition: all 0.2s; font-weight: bold; }
+        .home-btn:hover { background-color: #e9ecef; color: #333; }
+
+        h1 { font-size: 20px; color: #333; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #9C27B0; padding-bottom: 10px; margin-top: 0; }
+        .progress { text-align: right; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; line-height: 1.5; word-break: keep-all; }
+        
+        /* 주관식 입력 스타일 */
+        .input-container { display: flex; gap: 10px; margin-bottom: 10px; }
+        .input-answer { flex: 1; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; outline: none; transition: border 0.3s; }
+        .input-answer:focus { border-color: #9C27B0; }
+        
+        /* 버튼 스타일 */
+        .submit-btn { padding: 12px 15px; background-color: #9C27B0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .submit-btn:hover { background-color: #7B1FA2; }
+        .submit-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* 정답 확인(포기) 버튼 스타일 */
+        .check-btn { padding: 12px 15px; background-color: #f44336; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .check-btn:hover { background-color: #d32f2f; }
+        .check-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
+        .feedback strong { color: #d9534f; }
+        
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; display: none; }
+        .prev-btn { background-color: #6c757d; color: white; }
+        .next-btn { background-color: #4CAF50; color: white; }
+        
+        .result-screen { text-align: center; display: none; }
+        .score { font-size: 40px; font-weight: bold; color: #4CAF50; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <a href="index.html" class="home-btn">🏠 메인 메뉴로</a>
+
+    <div id="quiz-box">
+        <h1>☠️ 해냄 p3 핵심 50제 (독성학/대사)</h1>
+        <div class="progress" id="progress">문제 1 / 50</div>
+        <div class="question" id="question-text">문제 로딩중...</div>
+        
+        <div class="input-container" id="input-area">
+            <input type="text" class="input-answer" id="text-input" placeholder="정답을 입력하세요">
+            <button class="submit-btn" id="submit-answer-btn" onclick="checkTextAnswer()">제출</button>
+            <button class="check-btn" id="check-answer-btn" onclick="showAnswerDirectly()">정답 확인</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">⬅️ 이전 문제</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 문제 ➡️</button>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1>수고했습니다! 자네의 점수는?</h1>
+        <div class="score" id="final-score"></div>
+        <p id="score-message"></p>
+        <div class="btn-container">
+            <button class="nav-btn next-btn" style="display:block; background-color:#666;" onclick="location.href='index.html'">메인으로</button>
+            <button class="nav-btn next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 해냄 p3 독성학 50제 데이터
+    const quizData = [
+    {
+      "q": "1. CYP1A 유전자를 발현시키며, PCB나 벤조피렌(B(a)P)과 같은 물질이 리간드로 작용하는 핵 수용체는?",
+      "a": "AhR (Aryl hydrocarbon Receptor)",
+      "expl": "CYP1A는 AhR에 결합하여 발현을 유도합니다. 대표적인 유도물질로 PCB, B(a)P, TCDD 등이 있습니다."
+    },
+    {
+      "q": "2. CYP2B의 발현을 유도하며 Phenobarbital이 리간드로 작용하는 핵 수용체는?",
+      "a": "CAR (Constitutive Androstane Receptor)",
+      "expl": "CYP2B는 CAR를 통해 유도되며, Phenobarbital이 대표적인 유도제입니다."
+    },
+    {
+      "q": "3. Rifampin에 의해 유도되며, 가장 많은 약물의 대사에 관여하는 CYP 아형은?",
+      "a": "CYP3A (또는 CYP3A4)",
+      "expl": "CYP3A는 PXR(Pregnane X Receptor)을 통해 유도되며, Rifampin, Dexamethasone 등이 유도물질입니다."
+    },
+    {
+      "q": "4. Clofibrate와 같은 고지혈증 약물에 의해 유도되며, 지방산 대사에 관여하는 CYP 아형과 관련 수용체는? (형식: CYP4A, PPARa)",
+      "a": "CYP4A, PPARα",
+      "expl": "CYP4A는 PPARα(Peroxisome Proliferator Activated Receptor alpha)를 통해 유도됩니다."
+    },
+    {
+      "q": "5. CYP2E1에 의해 대사되며, 만성 음주자에 의해 대사가 촉진되어 간독성(NAPQI 생성)이 증가하는 약물은?",
+      "a": "Acetaminophen (AAP / 아세트아미노펜)",
+      "expl": "Ethanol은 CYP2E1을 유도하며, 이로 인해 Acetaminophen의 독성 대사체인 NAPQI 생성이 증가합니다."
+    },
+    {
+      "q": "6. 자몽주스(Grapefruit juice)에 함유된 성분으로 CYP3A4를 억제하여 고혈압 약물 등의 혈중 농도를 높이는 물질은?",
+      "a": "Naringin (또는 Bergamottin / 나린진)",
+      "expl": "자몽주스의 Naringin, Bergamottin 등은 CYP3A4를 억제하여 기질 약물의 대사를 저해합니다."
+    },
+    {
+      "q": "7. Isoniazid 대사에 관여하는 효소로, 유전적 다형성(Slow acetylator)에 의해 말초신경염 독성이 나타날 수 있는 효소는?",
+      "a": "NAT2 (N-acetyltransferase 2)",
+      "expl": "NAT2의 활성이 낮은 Slow acetylator는 Isoniazid 배설이 지연되어 말초신경염 등 부작용이 증가합니다."
+    },
+    {
+      "q": "8. 신생아에서 활성이 낮아 Chloramphenicol 투여 시 'Gray baby syndrome'을 유발하는 포합 대사 효소는?",
+      "a": "UGT (UDP-glucuronosyltransferase)",
+      "expl": "신생아는 Glucuronide 포합 능력이 낮아 Chloramphenicol이 축적되어 청색증(Gray baby syndrome)이 발생합니다."
+    },
+    {
+      "q": "9. 유전적으로 UGT1A1 결핍으로 인해 빌리루빈 대사 장애가 발생하여 황달과 핵황달을 유발하는 유전 질환은?",
+      "a": "Crigler-Najjar syndrome (크리글러-나자르 증후군)",
+      "expl": "UGT1A1 결핍 시 빌리루빈 포합이 안 되어 뇌 손상(핵황달)을 유발하는 Crigler-Najjar syndrome이 발생합니다."
+    },
+    {
+      "q": "10. 장내 세균의 β-glucosidase에 의해 당이 떨어져 나가면서 활성화되어 발암성을 나타내는 소철의 독성 성분은?",
+      "a": "Cycasin (사이카신)",
+      "expl": "Cycasin은 장내 세균의 β-glucosidase에 의해 당이 제거되어 Methylazoxymethanol이 되며 발암성을 나타냅니다."
+    },
+    {
+      "q": "11. 장내 세균의 Azo reductase에 의해 환원되어 항균 효과를 나타내는 Sulfanilamide로 변환되는 약물은?",
+      "a": "Prontosil (프론토실)",
+      "expl": "Prontosil은 장내 세균의 Azo 환원효소에 의해 활성형인 Sulfanilamide로 대사됩니다."
+    },
+    {
+      "q": "12. 간에서 포합된 약물이 담즙으로 배설된 후, 장내 세균의 효소에 의해 재흡수 가능한 형태로 바뀌어 다시 간으로 이동하는 현상은?",
+      "a": "장간순환 (Enterohepatic circulation)",
+      "expl": "장간순환은 약물의 체내 저류 시간을 연장시키며, 대표적으로 Morphine, Digoxin, Rifampin 등이 있습니다."
+    },
+    {
+      "q": "13. 담즙 배설이 잘 일어나는 화합물의 일반적인 분자량 기준은 약 얼마 이상인가? (범위로 답하시오)",
+      "a": "350~450 이상 (또는 500 이상)",
+      "expl": "분자량이 350~450 이상이고 극성이 큰 물질은 담즙으로 배설되는 경향이 큽니다."
+    },
+    {
+      "q": "14. 신장의 근위세뇨관에서 유기음이온 수송체(OAT)를 통해 배설되며, Probenecid와 병용 시 배설이 억제되는 항생제는?",
+      "a": "Penicillin (페니실린)",
+      "expl": "Probenecid는 OAT를 경쟁적으로 저해하여 페니실린의 세뇨관 분비를 억제, 혈중 농도를 유지시킵니다."
+    },
+    {
+      "q": "15. 간 소엽에서 산소가 풍부하고 GSH 농도가 높으며, Allyl alcohol에 의한 독성이 주로 나타나는 구역은?",
+      "a": "Zone 1 (문맥주위 영역)",
+      "expl": "Zone 1은 산소 농도가 높고 산화적 대사가 활발하여 Allyl alcohol이나 Fe 과잉에 의한 독성이 주로 발생합니다."
+    },
+    {
+      "q": "16. 간 소엽에서 CYP 효소 활성이 높고 산소 분압이 낮으며, CCl4나 Acetaminophen에 의한 괴사가 주로 일어나는 구역은?",
+      "a": "Zone 3 (중심정맥 주위 영역)",
+      "expl": "Zone 3는 CYP가 많아 독성 대사체(Radical 등) 생성이 많고, 산소가 적어 CCl4, Acetaminophen 등의 독성이 집중됩니다."
+    },
+    {
+      "q": "17. CCl4(사염화탄소)가 CYP2E1에 의해 대사되어 생성되는 강력한 지질과산화 유발 라디칼은?",
+      "a": "CCl3 라디칼 (Trichloromethyl radical)",
+      "expl": "CCl4는 CYP2E1에 의해 CCl3 라디칼이 되어 지질과산화를 유발하고 간세포를 괴사시킵니다."
+    },
+    {
+      "q": "18. Bromobenzene이 CYP에 의해 에폭사이드(Epoxide)를 형성하여 간세포 괴사를 유발할 때, 해독에 사용되는 포합 반응은?",
+      "a": "Glutathione 포합 (GSH conjugation / 글루타치온)",
+      "expl": "Epoxide 중간체는 주로 Glutathione과 포합되어 해독됩니다. GSH가 고갈되면 독성이 나타납니다."
+    },
+    {
+      "q": "19. 신장 독성 물질 중 사구체 족세포(Podocyte)를 손상시켜 단백뇨와 신증후군을 유발하는 대표적인 물질은?",
+      "a": "Puromycin (또는 Aminonucleoside / 퓨로마이신)",
+      "expl": "Puromycin, Doxorubicin 등은 사구체 상피세포(족세포)에 손상을 주어 단백뇨를 유발합니다."
+    },
+    {
+      "q": "20. 신장 근위세뇨관에 축적되어 β2-microglobulin 배설을 증가시키며, '이타이이타이병'의 원인이 되는 중금속은?",
+      "a": "Cadmium (Cd, 카드뮴)",
+      "expl": "카드뮴은 근위세뇨관에 축적되어 재흡수 기능을 저하시키고, 칼슘 배설을 증가시켜 골연화증(이타이이타이병)을 유발합니다."
+    },
+    {
+      "q": "21. 아미노글리코사이드계 항생제로, 리소좀에 축적되어 인지질증(Phospholipidosis)과 근위세뇨관 괴사를 유발하는 약물은?",
+      "a": "Gentamicin (젠타마이신)",
+      "expl": "Gentamicin 등 Aminoglycoside계 항생제는 양이온성으로 근위세뇨관 세포 내 리소좀에 축적되어 독성을 나타냅니다."
+    },
+    {
+      "q": "22. 원위세뇨관 및 집합관에 작용하여 요 농축 능력을 저하시키고 신성 요붕증을 유발할 수 있는 약물은?",
+      "a": "Lithium (리튬)",
+      "expl": "Lithium, Demeclocycline 등은 ADH 작용을 방해하여 원위세뇨관/집합관에서 수분 재흡수를 억제, 요붕증을 유발합니다."
+    },
+    {
+      "q": "23. NSAIDs를 장기 복용했을 때 신장 유두 괴사(Papillary necrosis)가 발생하는 기전은 어떤 물질의 합성이 억제되기 때문인가?",
+      "a": "Prostaglandin (PG / 프로스타글란딘)",
+      "expl": "NSAIDs는 COX를 억제하여 혈관 확장을 담당하는 Prostaglandin 합성을 줄이고, 이로 인해 신장 허혈(Ischemia)이 발생합니다."
+    },
+    {
+      "q": "24. 적혈구 내의 철(Fe)을 2가에서 3가로 산화시켜 산소 운반 능력을 상실하게 하여 청색증을 유발하는 질환은?",
+      "a": "메트헤모글로빈혈증 (Methemoglobinemia)",
+      "expl": "MetHb는 철이 Fe3+ 상태로 산화되어 산소와 결합하지 못해 저산소증과 청색증을 유발합니다."
+    },
+    {
+      "q": "25. 메트헤모글로빈혈증을 유발하는 대표적인 방향족 아민류 물질 두 가지는?",
+      "a": "Aniline, Nitrobenzene (아닐린, 니트로벤젠)",
+      "expl": "Aniline, Nitrobenzene 등 방향족 아민 및 니트로 화합물은 체내에서 대사되어 MetHb를 형성합니다."
+    },
+    {
+      "q": "26. 메트헤모글로빈혈증의 치료제로 사용되며, NADPH-MetHb 환원효소의 조효소로 작용하는 약물은?",
+      "a": "Methylene blue (메틸렌 블루)",
+      "expl": "Methylene blue는 Leucomethylene blue로 환원된 후 MetHb(Fe3+)를 Hb(Fe2+)로 환원시킵니다."
+    },
+    {
+      "q": "27. 항암제 Doxorubicin(Adriamycin)이 심장 독성을 나타내는 주된 기전은 무엇의 생성 때문인가?",
+      "a": "활성산소 (ROS / Free radical / Superoxide anion)",
+      "expl": "Doxorubicin은 심장 내에서 Redox cycling을 통해 과도한 활성산소를 생성하며, 심장은 항산화 효소가 부족하여 취약합니다."
+    },
+    {
+      "q": "28. 제초제 Paraquat이 폐에 선택적인 독성을 나타내는 이유는 폐세포의 어떤 수송계를 통해 능동적으로 섭취되기 때문인가?",
+      "a": "Polyamine 수송계 (Putrescine 수송계 / 폴리아민)",
+      "expl": "Paraquat은 구조적으로 Polyamine과 유사하여 폐의 Type I, II 세포 내로 능동 수송되어 고농도로 축적됩니다."
+    },
+    {
+      "q": "29. Paraquat 중독 시 산소 공급이 오히려 독성을 악화시키는 이유는?",
+      "a": "Redox cycle에 의한 활성산소(Superoxide) 생성 증가",
+      "expl": "Paraquat 독성 기전은 산소를 이용한 Redox cycle로 활성산소를 만드는 것이므로, 산소 공급 시 라디칼 생성이 폭발적으로 증가합니다."
+    },
+    {
+      "q": "30. 고구마 곰팡이 독소인 4-Ipomeanol이 폐의 특정 세포에 존재하는 CYP4B1에 의해 활성화되어 독성을 나타내는데, 이 표적 세포는?",
+      "a": "Clara cell (클라라 세포 / Club cell)",
+      "expl": "4-Ipomeanol은 폐의 Clara cell에 풍부한 CYP4B1에 의해 독성 에폭사이드로 대사되어 세포를 파괴합니다."
+    },
+    {
+      "q": "31. 합성 마약 불순물인 MPTP가 뇌 내에서 MAO-B에 의해 대사되어 생성되는 신경독성 물질은?",
+      "a": "MPP+",
+      "expl": "MPTP는 성상세포의 MAO-B에 의해 MPP+로 변환된 후, 도파민 신경세포로 섭취되어 파킨슨병 유사 증상을 유발합니다."
+    },
+    {
+      "q": "32. 복어 독(Tetrodotoxin)이 신경 전도를 차단하는 기전은?",
+      "a": "Na+ 채널 차단 (Voltage-gated Na+ channel blocker)",
+      "expl": "Tetrodotoxin(TTX)은 신경 세포막의 Na+ 채널을 막아 활동 전위의 발생과 전도를 차단합니다."
+    },
+    {
+      "q": "33. 유기인계(Organophosphate) 농약이나 Carbamate계 살충제가 신경 독성을 나타내는 타겟 효소는?",
+      "a": "Acetylcholinesterase (AChE / 아세틸콜린에스터라아제)",
+      "expl": "이들은 AChE를 억제하여 시냅스 틈에 아세틸콜린(ACh)이 과도하게 축적되게 하여 신경 독성을 유발합니다."
+    },
+    {
+      "q": "34. 유기인계 농약 중독 시 무스카린성 증상(침분비, 서맥 등) 완화를 위해 사용하는 해독제는?",
+      "a": "Atropine (아트로핀)",
+      "expl": "Atropine은 무스카린 수용체 길항제로, 유기인계 중독 시 기관지 분비 과다, 서맥 등의 증상을 완화합니다."
+    },
+    {
+      "q": "35. 유기인계 농약 중독 시 인산화된 AChE를 재생시키기 위해 사용하는 해독제는?",
+      "a": "Pralidoxime (2-PAM)",
+      "expl": "2-PAM은 AChE에 결합한 인산기를 떼어내어 효소를 재활성화시킵니다. (Carbamate 중독에는 사용하지 않음)"
+    },
+    {
+      "q": "36. Acrylamide나 n-Hexane이 유발하는 신경 독성으로, 신경 말단부터 변성이 일어나는 현상은?",
+      "a": "축삭돌기 변성 (Axonopathy / Dying-back neuropathy)",
+      "expl": "이들 물질은 신경섬유의 수송을 방해하여 말초 신경의 긴 축삭돌기 끝부분부터 변성이 일어나는 독성을 나타냅니다."
+    },
+    {
+      "q": "37. 중국 음식점 증후군을 유발하며, 흥분성 신경전달물질(Excitotoxicity)로 작용하여 신경세포 손상을 줄 수 있는 물질은?",
+      "a": "MSG (Monosodium Glutamate / 글루탐산나트륨)",
+      "expl": "MSG의 Glutamate는 과도한 흥분성 신경 독성을 유발할 수 있습니다."
+    },
+    {
+      "q": "38. 임산부가 복용했을 때 태아(여아)의 질 투명세포암(Clear cell carcinoma)을 유발하는 대표적인 합성 에스트로겐은?",
+      "a": "DES (Diethylstilbestrol)",
+      "expl": "DES는 과거 유산 방지제로 사용되었으나, 태아의 생식기 기형 및 사춘기 이후 질암 발생률을 높이는 최기형성 물질입니다."
+    },
+    {
+      "q": "39. 환경호르몬으로 알려진 Bisphenol A, DDT 등이 내분비계 교란을 일으키는 주된 기전은 어떤 수용체와의 결합인가?",
+      "a": "Estrogen 수용체 (ER / 에스트로겐)",
+      "expl": "이들은 Xenoestrogen으로 작용하여 에스트로겐 수용체에 결합, 작용제(Agonist) 혹은 길항제 역할을 합니다."
+    },
+    {
+      "q": "40. 목화씨 추출물에서 발견되어 남성 피임제(정자 생성 억제) 효과가 확인된 물질은?",
+      "a": "Gossypol (고시폴)",
+      "expl": "Gossypol은 정세관 상피를 손상시켜 정자 생성을 억제합니다."
+    },
+    {
+      "q": "41. 살충제 DBCP가 남성 작업자에게 유발한 대표적인 생식 독성은?",
+      "a": "불임 (무정자증 / 정자 감소)",
+      "expl": "DBCP는 고환 독성을 나타내어 정자 수를 감소시키고 불임을 유발합니다."
+    },
+    {
+      "q": "42. Ames test에서 히스티딘(His) 요구성 균주가 돌연변이를 일으켜 히스티딘 없이도 자라게 되는 현상을 무엇이라 하는가?",
+      "a": "복귀돌연변이 (Reverse mutation / Back mutation)",
+      "expl": "Ames test는 영양 요구성 균주가 원영양성(Prototrophic)으로 되돌아가는 복귀돌연변이 빈도를 측정합니다."
+    },
+    {
+      "q": "43. Ames test 수행 시, 피검 물질의 대사적 활성화를 위해 첨가하는 쥐 간의 추출물은?",
+      "a": "S-9 fraction (S-9 혼합액)",
+      "expl": "많은 발암물질은 체내 대사를 거쳐야 독성을 나타내므로(간접 발암원), CYP 효소가 포함된 간 S-9 분획을 함께 처리합니다."
+    },
+    {
+      "q": "44. 염색체 이상 시험 중 생체 내(In vivo) 시험으로, 골수 세포의 적혈구 내에 남은 염색체 조각을 관찰하는 시험은?",
+      "a": "소핵 시험 (Micronucleus test)",
+      "expl": "소핵은 세포 분열 시 방추사 기능 이상 등으로 인해 주핵에 들어가지 못한 염색체 조각입니다."
+    },
+    {
+      "q": "45. 흡입 마취제인 Methoxyflurane이 신장 독성을 유발하는 이유는 대사 과정에서 무엇이 유리되기 때문인가?",
+      "a": "불소 이온 (F-)",
+      "expl": "Methoxyflurane은 대사되어 불소 이온을 방출하며, 이것이 신장에 독성을 나타냅니다."
+    },
+    {
+      "q": "46. 결핵 치료제 Rifampin과 피임약을 병용했을 때 피임 효과가 떨어지는 이유는?",
+      "a": "CYP3A4 유도에 의한 피임약 대사 촉진",
+      "expl": "Rifampin은 CYP3A4를 강력하게 유도하여 피임약 성분(에스트로겐 등)을 빠르게 분해합니다."
+    },
+    {
+      "q": "47. 항진균제 Ketoconazole과 항히스타민제 Terfenadine을 병용 시 치명적인 심부정맥이 발생하는 이유는?",
+      "a": "CYP3A4 억제 (Terfenadine 혈중 농도 상승)",
+      "expl": "Ketoconazole은 CYP3A4를 억제하여 Terfenadine의 대사를 막고, 축적된 Terfenadine이 심장 독성(QT 연장)을 유발합니다."
+    },
+    {
+      "q": "48. 담즙산 수송체(BSEP)나 유기음이온 수송체(MRP2)의 기능 저하 시 간 내에 담즙이 정체되어 발생하는 독성 현상은?",
+      "a": "담즙 정체 (Cholestasis)",
+      "expl": "담즙 배설 수송체의 기능 장애는 간 내 담즙산 축적을 유발하여 간 손상을 일으킵니다."
+    },
+    {
+      "q": "49. 신장 독성 평가 시 사구체 여과율(GFR)을 대변하는 지표로 주로 사용되는 내인성 물질은?",
+      "a": "Creatinine (크레아티닌)",
+      "expl": "크레아티닌은 근육 대사 산물로, 대부분 사구체로 여과되고 재흡수되지 않아 신기능 지표로 쓰입니다."
+    },
+    {
+      "q": "50. 혈액-뇌 장벽(BBB)이 발달하지 않아 납(Pb) 중독 시 뇌부종 등 중추신경계 독성이 심하게 나타나는 연령층은?",
+      "a": "어린이 (유아)",
+      "expl": "어린이는 성인보다 BBB가 미성숙하여 납이 뇌로 쉽게 침투, 뇌병증(Encephalopathy)을 유발하기 쉽습니다."
+    }
+    ];
+
+    let currentQuestion = 0;
+    // 사용자 답안 저장
+    let userAnswers = new Array(quizData.length).fill(null);
+    // 정답 여부 저장
+    let correctnessArr = new Array(quizData.length).fill(null);
+
+    const questionText = document.getElementById("question-text");
+    const inputArea = document.getElementById("input-area");
+    const textInput = document.getElementById("text-input");
+    const submitBtn = document.getElementById("submit-answer-btn");
+    const checkBtn = document.getElementById("check-answer-btn");
+    
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
+    const progress = document.getElementById("progress");
+    const quizBox = document.getElementById("quiz-box");
+    const resultScreen = document.getElementById("result-screen");
+    const finalScore = document.getElementById("final-score");
+    const scoreMessage = document.getElementById("score-message");
+
+    // 엔터키 입력 시 정답 확인
+    textInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter" && !submitBtn.disabled) {
+            checkTextAnswer();
+        }
+    });
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionText.innerText = q.q;
+        feedback.style.display = "none";
+        progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+        
+        prevBtn.style.display = (currentQuestion === 0) ? "none" : "block";
+
+        if (userAnswers[currentQuestion] !== null) {
+            // 이미 푼 문제일 경우
+            if (userAnswers[currentQuestion] === "GIVE_UP") {
+                textInput.value = "";
+                textInput.placeholder = "포기한 문제입니다.";
+            } else {
+                textInput.value = userAnswers[currentQuestion];
+            }
+            
+            textInput.disabled = true;
+            submitBtn.disabled = true;
+            checkBtn.disabled = true;
+            
+            showFeedbackText(correctnessArr[currentQuestion]);
+        } else {
+            // 안 푼 문제일 경우
+            textInput.value = "";
+            textInput.placeholder = "정답을 입력하세요";
+            textInput.disabled = false;
+            submitBtn.disabled = false;
+            checkBtn.disabled = false;
+            
+            nextBtn.style.display = "none";
+            textInput.focus();
+        }
+    }
+
+    // [정답 확인] 버튼 (포기 기능)
+    function showAnswerDirectly() {
+        userAnswers[currentQuestion] = "GIVE_UP"; 
+        correctnessArr[currentQuestion] = false; 
+
+        textInput.disabled = true;
+        submitBtn.disabled = true;
+        checkBtn.disabled = true; 
+
+        showFeedbackText(false);
+    }
+
+    // 주관식 정답 체크 로직
+    function checkTextAnswer() {
+        const userVal = textInput.value.trim();
+        if (!userVal) return; 
+
+        userAnswers[currentQuestion] = userVal;
+        
+        const q = quizData[currentQuestion];
+        
+        const cleanUser = userVal.toLowerCase().replace(/\s+/g, "");
+        const originAns = q.a;
+        
+        // 정답 문자열 정규화 (괄호, 슬래시 등을 구분자로 분리하여 키워드 추출)
+        // 예: "Warfarin (와파린 / Dicumarol)" -> ["warfarin", "와파린", "dicumarol"]
+        let processedAns = originAns
+            .replace(/[\(\),\/+]/g, "|") 
+            .replace(/->/g, "|")         
+            .replace(/(A:|B:)/g, "|");   
+
+        const keywords = processedAns.split("|")
+            .map(k => k.toLowerCase().replace(/\s+/g, ""))
+            .filter(k => k.length > 0);
+
+        let isCorrect = false;
+
+        // 1. 키워드 완전 일치 확인 (가장 정확)
+        if (keywords.includes(cleanUser)) {
+            isCorrect = true;
+        } 
+        // 2. 포함 여부 확인 (유연성 부여)
+        else {
+            for (let key of keywords) {
+                // 키워드가 2글자 이상이고 상호 포함관계일 때 정답 처리
+                if (key.length >= 2 && (cleanUser.includes(key) || key.includes(cleanUser))) {
+                    isCorrect = true;
+                    break;
+                }
+            }
+        }
+
+        correctnessArr[currentQuestion] = isCorrect;
+
+        textInput.disabled = true;
+        submitBtn.disabled = true;
+        checkBtn.disabled = true;
+
+        showFeedbackText(isCorrect);
+    }
+
+    // 피드백 표시
+    function showFeedbackText(isCorrect) {
+        const q = quizData[currentQuestion];
+        if (isCorrect) {
+            textInput.style.borderColor = "#4CAF50"; 
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+        } else {
+            textInput.style.borderColor = "#f44336"; 
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a}</strong> 입니다.<br>${q.expl}`;
+        }
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+        updateNextBtnText();
+    }
+
+    function updateNextBtnText() {
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "결과 보기";
+        } else {
+            nextBtn.innerText = "다음 문제 ➡️";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let finalScoreValue = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            if (correctnessArr[i]) finalScoreValue++;
+        }
+
+        quizBox.style.display = "none";
+        resultScreen.style.display = "block";
+        finalScore.innerText = `${finalScoreValue} / ${quizData.length}점`;
+        
+        if (finalScoreValue >= quizData.length * 0.9) {
+            scoreMessage.innerText = "독성학 마스터! 이 기세로 국시 합격 가자! 💊";
+        } else if (finalScoreValue >= quizData.length * 0.7) {
+            scoreMessage.innerText = "잘했어! 헷갈리는 CYP 유도제만 다시 보자! 👍";
+        } else {
+            scoreMessage.innerText = "3페이지 표 다시 외우고 오자! 화이팅! 📚";
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
