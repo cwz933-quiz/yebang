@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예방약학 객관식30제 (해냄 2p)</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; }
+        
+        /* 메인으로 가기 버튼 스타일 */
+        .home-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding: 8px 12px;
+            background-color: #f1f3f5;
+            border-radius: 20px;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        .home-btn:hover { background-color: #e9ecef; color: #333; }
+
+        h1 { font-size: 20px; color: #333; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-top: 0; }
+        .progress { text-align: right; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; line-height: 1.5; }
+        .options { list-style: none; padding: 0; }
+        .options li { margin-bottom: 10px; }
+        .options button { width: 100%; padding: 12px; font-size: 16px; text-align: left; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .options button:hover { background-color: #e8f5e9; }
+        
+        /* 정답/오답 스타일 */
+        .options button.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .options button.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        
+        .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
+        .feedback strong { color: #d9534f; }
+        
+        /* 버튼 컨테이너 (좌우 배치) */
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; display: none; }
+        .prev-btn { background-color: #6c757d; color: white; }
+        .prev-btn:hover { background-color: #5a6268; }
+        .next-btn { background-color: #4CAF50; color: white; }
+        .next-btn:hover { background-color: #45a049; }
+
+        .result-screen { text-align: center; display: none; }
+        .score { font-size: 40px; font-weight: bold; color: #4CAF50; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <a href="index.html" class="home-btn">🏠 메인 메뉴로</a>
+
+    <div id="quiz-box">
+        <h1>💊 ㅎㄴ2p 객관식 30제</h1>
+        <div class="progress" id="progress">문제 1 / 30</div>
+        <div class="question" id="question-text">문제 로딩중...</div>
+        <ul class="options" id="options-list"></ul>
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">⬅️ 이전 문제</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 문제 ➡️</button>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1>수고했습니다! 자네의 점수는?</h1>
+        <div class="score" id="final-score"></div>
+        <p id="score-message"></p>
+        <div class="btn-container">
+            <button class="nav-btn next-btn" style="display:block; background-color:#666;" onclick="location.href='index.html'">메인으로</button>
+            <button class="nav-btn next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+  const quizData = [
+  {
+    q: "1. 수돗물 소독 시 염소가 물에 녹아 생성되는 물질 중, 살균력이 가장 강하고 산성 조건에서 비율이 높아지는 형태는?",
+    a: ["OCl- (Hypochlorite ion)", "HClO (Hypochlorous acid)", "NH2Cl (Monochloramine)", "NHCl2 (Dichloramine)", "NCl3 (Trichloramine)"],
+    c: 1,
+    expl: "HClO(차아염소산)는 OCl-(차아염소산 이온)보다 살균력이 약 80배 강하며, pH가 낮을수록(산성) HClO의 비율이 높아집니다. (키워드 30, 31)"
+  },
+  {
+    q: "2. 염소 소독 시 암모니아나 유기 아민과 결합하여 생성되며, 잔류 효과가 길고 냄새가 적은 소독 형태는?",
+    a: ["유리 잔류 염소", "결합 잔류 염소(Chloramine)", "차아염소산", "차아염소산 이온", "오존"],
+    c: 1,
+    expl: "결합 잔류 염소(Chloramine)는 살균력은 유리형보다 약하지만, 잔류성이 길고 자극적인 냄새가 적으며 트리할로메탄(THM) 생성이 적습니다. (키워드 30, 31)"
+  },
+  {
+    q: "3. 수중의 오염물질을 산화시키기 위해 투입된 염소량이 모두 소비되고, 유리 잔류 염소가 나타나기 시작하는 지점을 무엇이라 하는가?",
+    a: ["당량점", "불연속점 (Breakpoint)", "임계점", "포화점", "반환점"],
+    c: 1,
+    expl: "불연속점 염소주입법은 염소 요구량을 충족시킨 후 유리 잔류 염소가 생성되도록 하는 방법입니다. (키워드 30, 31)"
+  },
+  {
+    q: "4. 수질 오염 지표 중 단백질이나 아미노산의 초기 분해 산물로, 분변 등에 의한 '최근의 오염'을 의미하는 것은?",
+    a: ["질산성 질소 (NO3-N)", "아질산성 질소 (NO2-N)", "암모니아성 질소 (NH3-N)", "황산염", "인산염"],
+    c: 2,
+    expl: "암모니아성 질소는 오염의 초기 단계를 나타내며 가까운 시일 내의 오염(최근 오염)을 시사합니다. 반면 질산성 질소는 과거의 오염을 의미합니다. (키워드 34, 35)"
+  },
+  {
+    q: "5. 상수원수에 포함된 '부식질(Humic acid)'이 염소와 반응하여 생성되는 발암성 부산물은?",
+    a: ["다이옥신", "PCB", "트리할로메탄 (THM)", "벤조피렌", "아크릴아마이드"],
+    c: 2,
+    expl: "부식질(Humic acid)은 THM의 전구물질로 작용하며, 염소 소독 시 반응하여 트리할로메탄(THM)을 생성합니다. (키워드 32)"
+  },
+  {
+    q: "6. 사람이 느끼는 추위와 더위를 수치로 나타낸 '감각온도'의 3대 구성 요소는?",
+    a: ["기온, 기습, 기압", "기온, 기습, 기류(기동)", "기온, 복사열, 기류", "기온, 기압, 복사열", "기습, 기류, 복사열"],
+    c: 1,
+    expl: "감각온도는 기온, 기습, 기류(기동)의 3자 관계가 인체에 주는 온감을 의미합니다. (키워드 42)"
+  },
+  {
+    q: "7. 방사선 중 전리 작용(Ionization)이 가장 강하고 투과력은 가장 약하여, 체내 피폭 시 가장 위험한 방사선은?",
+    a: ["알파(α)선", "베타(β)선", "감마(γ)선", "X선", "자외선"],
+    c: 0,
+    expl: "알파선은 입자가 커서 투과력은 약하지만(종이 한 장으로 차단), 전리 작용이 강해 체내 섭취 시 조직 손상 위험이 가장 큽니다. (키워드 43, 44, 45)"
+  },
+  {
+    q: "8. 베르고니-트리봉도(Bergonie-Tribondeau) 법칙에 따라 방사선 감수성이 가장 높은 조직이나 세포는?",
+    a: ["신경 세포", "근육 세포", "간세포", "조혈장기(골수) 및 생식세포", "뼈"],
+    c: 3,
+    expl: "세포 분열이 왕성하고, 분열 능력이 클수록, 미분화된 세포일수록 방사선 감수성이 높습니다. (조혈장기, 생식세포 > 신경, 뼈). (키워드 46)"
+  },
+  {
+    q: "9. 방사선의 영향 중 발암, 유전적 장애와 같이 발생 확률이 선량에 비례하며 '역치(Threshold)'가 없다고 가정하는 효과는?",
+    a: ["확정적 영향 (Deterministic effect)", "확률적 영향 (Stochastic effect)", "급성 독성", "만성 독성", "전신 독성"],
+    c: 1,
+    expl: "확률적 영향(Stochastic effect)은 암, 유전적 장애 등이며 역치가 없고 선량에 따라 발생 확률이 증가합니다. (키워드 43~46)"
+  },
+  {
+    q: "10. 진동 장애의 대표적인 증상으로, 말초 혈관 수축으로 인해 손가락이 창백해지는 현상은?",
+    a: ["청력 손실", "레이노 증후군 (Raynaud's phenomenon)", "이타이이타이병", "미나마타병", "파킨슨 증후군"],
+    c: 1,
+    expl: "국소 진동 폭로(착암기 등)는 레이노 증후군(창백한 손가락, White finger disease)을 유발합니다. (키워드 47, 48)"
+  },
+  {
+    q: "11. 위해성 평가(Risk Assessment)의 4단계 과정을 순서대로 올바르게 나열한 것은?",
+    a: ["위해성 결정 -> 노출 평가 -> 용량-반응 평가 -> 유해성 확인", "유해성 확인 -> 용량-반응 평가 -> 노출 평가 -> 위해도 결정", "노출 평가 -> 유해성 확인 -> 위해도 결정 -> 용량-반응 평가", "유해성 확인 -> 노출 평가 -> 용량-반응 평가 -> 위해도 결정", "용량-반응 평가 -> 유해성 확인 -> 위해도 결정 -> 노출 평가"],
+    c: 1,
+    expl: "위해성 평가는 1. 유해성 확인(Hazard ID) -> 2. 용량-반응 평가(Dose-Response) -> 3. 노출 평가(Exposure) -> 4. 위해도 결정(Characterization) 순으로 진행됩니다. (키워드 49~54)"
+  },
+  {
+    q: "12. [계산] 체중 60kg인 성인에게 어떤 화학물질의 최대무독성용량(NOAEL)이 100 mg/kg/day로 확인되었다. 불확실성 계수(UF)를 100으로 적용할 때, 이 물질의 인체 허용 섭취량(RfD 또는 ADI)은 얼마인가?",
+    a: ["0.1 mg/kg/day", "1 mg/kg/day", "10 mg/kg/day", "100 mg/kg/day", "1000 mg/kg/day"],
+    c: 1,
+    expl: "RfD(ADI) = NOAEL / UF = 100 / 100 = 1 mg/kg/day. (키워드 49~54)"
+  },
+  {
+    q: "13. [계산] 체중 20kg인 어린이가 매일 식품을 통해 오염물질 X를 섭취하고 있다. 물질 X의 일일 섭취 허용량(TDI)이 0.05 mg/kg/day일 때, 이 어린이의 '일일 안전 섭취 총량(mg/day)'은?",
+    a: ["0.1 mg", "0.5 mg", "1.0 mg", "5.0 mg", "10 mg"],
+    c: 2,
+    expl: "일일 안전 섭취 총량 = TDI × 체중 = 0.05 mg/kg/day × 20 kg = 1.0 mg/day. (키워드 49~54)"
+  },
+  {
+    q: "14. [계산] 독성 물질 Y의 NOAEL이 500 mg/kg/day이고, 현재 인구 집단의 추정 노출량이 5 mg/kg/day이다. 이 경우 안전역(Margin of Exposure, MOE)은 얼마인가?",
+    a: ["10", "50", "100", "500", "1000"],
+    c: 2,
+    expl: "MOE = NOAEL / 노출량 = 500 / 5 = 100. (MOE가 클수록 안전함). (키워드 49~54)"
+  },
+  {
+    q: "15. 발암성 물질의 위해성 평가에서 사용하는 척도로, 하루 1 mg/kg의 용량에 평생 노출되었을 때 암이 발생할 확률을 의미하는 것은?",
+    a: ["참고용량 (RfD)", "최대무독성용량 (NOAEL)", "발암력 (Slope Factor)", "안전역 (MOE)", "최소영향용량 (LOAEL)"],
+    c: 2,
+    expl: "발암력(Slope Factor, Unit Risk)은 발암물질의 용량-반응 관계 기울기로, 단위 용량당 초과 발암 위해도를 의미합니다. (키워드 49~54)"
+  },
+  {
+    q: "16. 생물학적 농축(Bioconcentration)이 잘 되는 물질(DDT, PCB 등)의 일반적인 특징은?",
+    a: ["높은 수용성", "빠른 대사 및 배설", "높은 지질 친화성(Lipophilicity)", "낮은 분자량", "높은 이온화 경향"],
+    c: 2,
+    expl: "생물 농축성 물질은 지용성이 커서 지방 조직에 축적되며, 대사가 잘 되지 않아 체내 잔류 시간이 깁니다. (키워드 55)"
+  },
+  {
+    q: "17. 초단시간형 바비튜레이트인 Thiopental이 투여 직후 뇌에서 작용하다가 금방 작용이 소실되는 주된 이유는?",
+    a: ["간에서의 빠른 대사", "신장으로의 빠른 배설", "뇌 조직에서의 불활성화", "다른 조직(근육, 지방)으로의 재분포", "담즙 배설"],
+    c: 3,
+    expl: "Thiopental은 지용성이 커서 뇌로 빨리 갔다가, 곧 혈류가 많은 다른 장기나 근육, 지방으로 재분포(Redistribution)되어 작용이 종료됩니다. (키워드 56)"
+  },
+  {
+    q: "18. 약물 대사 과정 중 1상 대사(Phase I)에 해당하는 반응은?",
+    a: ["Glucuronide 포합", "산화 (Oxidation)", "황산 포합 (Sulfation)", "아세틸화 (Acetylation)", "메틸화 (Methylation)"],
+    c: 1,
+    expl: "1상 대사는 산화, 환원, 가수분해 반응을 통해 작용기를 도입하거나 노출시키는 과정입니다. 포합 반응은 2상 대사입니다. (키워드 58)"
+  },
+  {
+    q: "19. 다음 중 체내 대사 과정(환원 반응)을 통해 활성형인 Sulfanilamide로 전환되어 항균 작용을 나타내는 물질은?",
+    a: ["Prontosil", "Aniline", "Nitrobenzene", "Ethanol", "Isoniazid"],
+    c: 0,
+    expl: "Prontosil은 체내에서 Azo reduction(환원)을 통해 Sulfanilamide로 활성화되는 대표적인 대사 활성화(Bioactivation) 사례입니다. (키워드 57)"
+  },
+  {
+    q: "20. Cytochrome P450(CYP) 효소계에 대한 설명으로 올바른 것은?",
+    a: ["주로 세포질(Cytosol)에 존재한다.", "약물의 환원 반응만 촉매한다.", "철(Fe)을 함유한 Heme 단백질이다.", "NADPH 없이 단독으로 작용한다.", "기질 특이성이 매우 높아 한 가지 약물만 대사한다."],
+    c: 2,
+    expl: "CYP는 미토콘드리아나 소포체(Microsome)에 존재하는 Heme 단백질로, NADPH와 산소를 이용하여 산화 반응을 촉매합니다. 기질 특이성은 낮아 다양한 약물을 대사합니다. (키워드 58)"
+  },
+  {
+    q: "21. 2상 대사(포합 반응) 중 'Microsome'에 효소가 존재하며 가장 빈번하게 일어나는 반응은?",
+    a: ["황산 포합", "Glucuronide 포합", "글루타치온 포합", "아세틸 포합", "아미노산 포합"],
+    c: 1,
+    expl: "Glucuronide 포합은 Microsome에 있는 UGT 효소에 의해 일어나며, 포합 반응 중 가장 일반적이고 용량이 큽니다. (나머지는 주로 Cytosol). (키워드 59)"
+  },
+  {
+    q: "22. Glucuronide 포합 반응에 필요한 활성 보조 인자(Cofactor)는?",
+    a: ["PAPS", "UDPGA", "Acetyl-CoA", "S-adenosylmethionine (SAM)", "Glutathione"],
+    c: 1,
+    expl: "Glucuronide 포합에는 UDP-Glucuronic acid (UDPGA)가 보조 인자로 사용됩니다. (키워드 59)"
+  },
+  {
+    q: "23. 친전자성 물질(Epoxide 등)을 해독하는 데 중요한 역할을 하며, 최종적으로 Mercapturic acid 형태로 배설되는 포합 반응은?",
+    a: ["Glucuronide 포합", "Sulfate 포합", "Glutathione (GSH) 포합", "Glycine 포합", "Methylation"],
+    c: 2,
+    expl: "Glutathione 포합은 GST 효소에 의해 일어나며, 독성 친전자체를 해독하여 최종적으로 Mercapturic acid로 배설됩니다. (키워드 59)"
+  },
+  {
+    q: "24. 황산 포합(Sulfate conjugation)에 사용되는 활성 황산 공여체는?",
+    a: ["UDPGA", "PAPS", "GSH", "Acetyl-CoA", "Glycine"],
+    c: 1,
+    expl: "황산 포합은 Sulfotransferase에 의해 일어나며, 보조 인자로 PAPS(Phosphoadenosine-phosphosulfate)가 필요합니다. (키워드 59)"
+  },
+  {
+    q: "25. 유전적 다형성(Genetic Polymorphism)으로 인해 Isoniazid 대사 속도에 개인차(Slow/Fast acetylator)를 유발하는 포합 효소는?",
+    a: ["UGT", "GST", "NAT (N-acetyltransferase)", "Sulfotransferase", "Methyltransferase"],
+    c: 2,
+    expl: "N-acetyltransferase (NAT2)의 유전적 차이로 인해 Isoniazid 등의 대사 속도가 달라집니다. (키워드 59, 66)"
+  },
+  {
+    q: "26. 신생아에서 UGT(Glucuronyl transferase) 활성이 낮아 Chloramphenicol 투여 시 발생할 수 있는 독성은?",
+    a: ["핵황달", "Gray baby syndrome (회색아기 증후군)", "용혈성 빈혈", "신부전", "청각 장애"],
+    c: 1,
+    expl: "신생아는 Glucuronide 포합 능력이 미숙하여 Chloramphenicol이 축적되면 호흡 곤란, 청색증 등을 동반한 Gray baby syndrome이 발생합니다. (키워드 59, 65)"
+  },
+  {
+    q: "27. 식품 보존료인 안식향산(Benzoic acid)이 체내에서 Glycine과 포합하여 생성되는 대사 산물은?",
+    a: ["Hippuric acid (마뇨산)", "Mercapturic acid", "Salicylic acid", "Gentisic acid", "Oxalic acid"],
+    c: 0,
+    expl: "Benzoic acid는 Glycine과 아미노산 포합을 하여 Hippuric acid(마뇨산)로 배설됩니다. (키워드 59)"
+  },
+  {
+    q: "28. 카테콜아민(Catecholamine) 대사에 관여하며, S-adenosylmethionine(SAM)을 공여체로 사용하는 반응은?",
+    a: ["아세틸화", "메틸화 (Methylation)", "황산 포합", "글루타치온 포합", "가수분해"],
+    c: 1,
+    expl: "COMT 등의 효소에 의한 메틸화 반응은 SAM을 메틸기 공여체로 사용합니다. (키워드 59)"
+  },
+  {
+    q: "29. CCl4(사염화탄소)가 CYP2E1에 의해 대사되어 간 독성을 유발하는 기전은?",
+    a: ["Epoxide 생성", "수산화 반응 (Hydroxylation)", "환원적 탈할로겐화에 의한 라디칼(CCl3•) 생성", "가수분해", "Glucuronide 포합"],
+    c: 2,
+    expl: "CCl4는 CYP에 의해 환원적으로 탈염소화되어 반응성이 큰 Trichloromethyl radical(CCl3•)을 생성, 지질 과산화를 유발합니다. (키워드 58, 71)"
+  },
+  {
+    q: "30. 1상 대사 중 가수분해(Hydrolysis)에 의해 대사되는 약물의 조합으로 올바른 것은?",
+    a: ["Aspirin, Procaine", "Isoniazid, Phenytoin", "Acetaminophen, Ethanol", "Benzene, Toluene", "Morphine, Codeine"],
+    c: 0,
+    expl: "Ester나 Amide 결합을 가진 약물(Aspirin, Procaine, Lidocaine 등)은 Esterase나 Amidase에 의해 가수분해됩니다. (키워드 58)"
+  }
+];
+
+    let currentQuestion = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    const questionText = document.getElementById("question-text");
+    const optionsList = document.getElementById("options-list");
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
+    const progress = document.getElementById("progress");
+    const quizBox = document.getElementById("quiz-box");
+    const resultScreen = document.getElementById("result-screen");
+    const finalScore = document.getElementById("final-score");
+    const scoreMessage = document.getElementById("score-message");
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionText.innerText = q.q;
+        optionsList.innerHTML = "";
+        
+        progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+        
+        if (currentQuestion === 0) {
+            prevBtn.style.display = "none";
+        } else {
+            prevBtn.style.display = "block";
+        }
+
+        const answeredIndex = userAnswers[currentQuestion];
+        const isAnswered = answeredIndex !== null;
+
+        if (isAnswered) {
+            feedback.style.display = "block";
+            nextBtn.style.display = "block";
+            if (currentQuestion === quizData.length - 1) {
+                 nextBtn.innerText = "결과 보기";
+            } else {
+                 nextBtn.innerText = "다음 문제 ➡️";
+            }
+            
+            if (answeredIndex === q.c) {
+                feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+            } else {
+                feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+            }
+        } else {
+            feedback.style.display = "none";
+            nextBtn.style.display = "none";
+        }
+
+        q.a.forEach((option, index) => {
+            const li = document.createElement("li");
+            const btn = document.createElement("button");
+            btn.innerText = option;
+            
+            if (isAnswered) {
+                btn.disabled = true;
+                if (index === q.c) {
+                    btn.classList.add("correct");
+                } else if (index === answeredIndex && index !== q.c) {
+                    btn.classList.add("wrong");
+                }
+            } else {
+                btn.onclick = () => checkAnswer(index, btn);
+            }
+            
+            li.appendChild(btn);
+            optionsList.appendChild(li);
+        });
+    }
+
+    function checkAnswer(selectedIndex, btn) {
+        userAnswers[currentQuestion] = selectedIndex;
+        
+        const q = quizData[currentQuestion];
+        const buttons = optionsList.querySelectorAll("button");
+        buttons.forEach(b => b.disabled = true);
+
+        if (selectedIndex === q.c) {
+            btn.classList.add("correct");
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+        } else {
+            btn.classList.add("wrong");
+            buttons[q.c].classList.add("correct");
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+        }
+
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+        
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "결과 보기";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let finalScoreValue = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            if (userAnswers[i] === quizData[i].c) {
+                finalScoreValue++;
+            }
+        }
+
+        quizBox.style.display = "none";
+        resultScreen.style.display = "block";
+        finalScore.innerText = `${finalScoreValue} / ${quizData.length}점`;
+        
+        if (finalScoreValue >= 25) {
+            scoreMessage.innerText = "대단하네! 이 정도면 국시 예방약학은 걱정 없겠어!";
+        } else if (finalScoreValue >= 15) {
+            scoreMessage.innerText = "잘했네! 틀린 부분만 다시 복습하면 완벽할 걸세.";
+        } else {
+            scoreMessage.innerText = "조금 더 분발하게. 해냄 3페이지를 다시 꼼꼼히 읽어보게나.";
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
