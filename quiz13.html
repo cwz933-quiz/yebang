@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예방약학 객관식30제 (해냄 6p)</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; }
+        
+        /* 메인으로 가기 버튼 스타일 */
+        .home-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding: 8px 12px;
+            background-color: #f1f3f5;
+            border-radius: 20px;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        .home-btn:hover { background-color: #e9ecef; color: #333; }
+
+        h1 { font-size: 20px; color: #333; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-top: 0; }
+        .progress { text-align: right; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; line-height: 1.5; }
+        .options { list-style: none; padding: 0; }
+        .options li { margin-bottom: 10px; }
+        .options button { width: 100%; padding: 12px; font-size: 16px; text-align: left; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .options button:hover { background-color: #e8f5e9; }
+        
+        /* 정답/오답 스타일 */
+        .options button.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .options button.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        
+        .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
+        .feedback strong { color: #d9534f; }
+        
+        /* 버튼 컨테이너 (좌우 배치) */
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; display: none; }
+        .prev-btn { background-color: #6c757d; color: white; }
+        .prev-btn:hover { background-color: #5a6268; }
+        .next-btn { background-color: #4CAF50; color: white; }
+        .next-btn:hover { background-color: #45a049; }
+
+        .result-screen { text-align: center; display: none; }
+        .score { font-size: 40px; font-weight: bold; color: #4CAF50; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <a href="index.html" class="home-btn">🏠 메인 메뉴로</a>
+
+    <div id="quiz-box">
+        <h1>💊 ㅎㄴ6p 객관식 30제</h1>
+        <div class="progress" id="progress">문제 1 / 30</div>
+        <div class="question" id="question-text">문제 로딩중...</div>
+        <ul class="options" id="options-list"></ul>
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">⬅️ 이전 문제</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 문제 ➡️</button>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1>수고했습니다! 자네의 점수는?</h1>
+        <div class="score" id="final-score"></div>
+        <p id="score-message"></p>
+        <div class="btn-container">
+            <button class="nav-btn next-btn" style="display:block; background-color:#666;" onclick="location.href='index.html'">메인으로</button>
+            <button class="nav-btn next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+ const quizData = [
+  {
+    q: "1. 페닐케톤뇨증(Phenylketonuria) 환자가 체내에서 페닐알라닌을 타이로신(Tyrosine)으로 전환하지 못해 결핍되는 효소는?",
+    a: ["Fumarylacetoacetate hydrolase", "Phenylalanine hydroxylase", "Homogentisate oxidase", "Tyrosinase", "Cystathionine β-synthase"],
+    c: 1,
+    expl: "페닐케톤뇨증은 Phenylalanine hydroxylase의 결핍으로 발생하며, 페닐알라닌 제한 식이요법이 필요합니다. (해냄 6p, 대사 문제)"
+  },
+  {
+    q: "2. 타이로신 혈증(Tyrosinemia) 중 간 경변, 판코니 증후군을 유발하며 Fumarylacetoacetate hydrolase 효소의 결핍이 원인인 유형은?",
+    a: ["Type I", "Type II", "Type III", "Type IV", "Type V"],
+    c: 0,
+    expl: "Tyrosinemia Type I은 Fumarylacetoacetate hydrolase 결핍으로 인해 간과 신장에 치명적인 손상을 입힙니다. (해냄 6p, 대사 문제)"
+  },
+  {
+    q: "3. 메티오닌(Methionine)의 대사 과정 중 Cystathionine β-synthase의 결핍으로 인해 혈중에 호모시스테인이 축적되어 지능 저하와 골다공증을 유발하는 질환은?",
+    a: ["알비노증", "단풍당뇨증", "호모시스틴뇨증 (Homocystinuria)", "티로신혈증", "가라토오스혈증"],
+    c: 2,
+    expl: "호모시스틴뇨증은 Cystathionine β-synthase 결핍으로 호모시스테인이 축적되어 수정체 탈구, 골다공증 등을 일으킵니다. (해냄 6p, 대사 문제)"
+  },
+  {
+    q: "4. 아미노산 대사 질환 중 BCKAD 효소 복합체의 결핍으로 인해 소변에서 특징적인 단 냄새가 나며, 신경계 이상을 초래하는 질환은?",
+    a: ["페닐케톤뇨증", "호모시스틴뇨증", "단풍당뇨증 (MSUD)", "알캅톤뇨증", "통풍"],
+    c: 2,
+    expl: "단풍당뇨증(Maple Syrup Urine Disease)은 분지쇄 아미노산(BCAA) 대사 효소인 BCKAD 결핍으로 발생합니다. (해냄 6p, 대사 문제)"
+  },
+  {
+    q: "5. 장염 비브리오 식중독을 일으키는 원인균인 Vibrio parahaemolyticus가 가진 주요 병원성 인자로, 적혈구를 용혈시키는 내열성 용혈독소는?",
+    a: ["Enterotoxin", "Neurotoxin", "Thermostable direct hemolysin (TDH)", "Amatoxin", "Saxitoxin"],
+    c: 2,
+    expl: "장염 비브리오균은 내열성 용혈독소(Kanagawa 현상 양성)를 통해 설사와 복통을 유발합니다. (해냄 6p, 감염형 식중독)"
+  },
+  {
+    q: "6. 식중독균 중 잠복기가 1~6시간으로 매우 짧으며, 조리사의 화농성 질환 부위에서 유래하여 내열성 엔테로톡신(Enterotoxin)을 생성하는 균은?",
+    a: ["살모넬라균", "장염 비브리오균", "포도알균 (Staphylococcus aureus)", "보툴리누스균", "바실러스 세레우스"],
+    c: 2,
+    expl: "포도알균 식중독은 조리사의 화농성 염증 등에서 오염되며, 생성된 독소는 열에 강해 일반적인 조리로 파괴되지 않습니다. (해냄 6p, 독소형 식중독)"
+  },
+  {
+    q: "7. 통조림이나 소시지 등 혐기적 조건에서 증식하며, 신경마비 증상과 호흡 마비를 일으키는 강력한 신경독소를 생성하는 식중독균은?",
+    a: ["Vibrio vulnificus", "Clostridium botulinum", "Salmonella Enteritidis", "Listeria monocytogenes", "Morganella morganii"],
+    c: 1,
+    expl: "보툴리누스균은 강력한 신경독소(Ach 유리 차단)를 생성하여 마비 증상을 일으킵니다. 유아에게는 꿀이 원인이 되기도 합니다. (해냄 6p, 독소형 식중독)"
+  },
+  {
+    q: "8. 겨울철에 주로 발생하며, 소량의 입자로도 감염되는 Focal-oral 경로의 대표적인 바이러스성 식중독 원인은?",
+    a: ["로타바이러스", "노로바이러스", "아데노바이러스", "A형 간염 바이러스", "인플루엔자 바이러스"],
+    c: 1,
+    expl: "노로바이러스는 겨울철 식중독의 주원인이며 사람 간 전파가 쉽고 소량으로도 감염됩니다. (해냄 6p, 노로바이러스)"
+  },
+  {
+    q: "9. 등푸른 생선(고등어, 꽁치 등)에 함유된 히스티딘이 세균에 의해 변질되어 생성되며, 알레르기 유사 반응을 일으키는 물질은?",
+    a: ["Tyramine", "Cadaverine", "Histamine", "Putrescine", "Agmatine"],
+    c: 2,
+    expl: "Morganella morganii 등에 의해 히스티딘이 히스타민으로 변하여 알레르기성 식중독을 유발합니다. (해냄 6p, 알레르기성 식중독)"
+  },
+  {
+    q: "10. 복어독인 테트로도톡신(Tetrodotoxin)의 독성 발현 기전으로 옳은 것은?",
+    a: ["Acetylcholine 유리 억제", "Na+ 채널 차단에 의한 신경전달 억제", "Cholinesterase 활성 저해", "RNA polymerase II 활성 저해", "칼슘 채널 차단"],
+    c: 1,
+    expl: "테트로도톡신은 신경세포막의 Na+ 채널을 선택적으로 차단하여 신경 전도를 막아 마비를 일으킵니다. (해냄 6p, 복어독 중독)"
+  },
+  {
+    q: "11. 조개류 독 중 하나로 바지락, 모시조개 등에서 발견되며 겨울철에 주로 발생하고 간 기능 장해를 특징으로 하는 독소는?",
+    a: ["Saxitoxin", "Venerupin (베네루핀)", "Okadaic acid", "Tetramine", "Surugatoxin"],
+    c: 1,
+    expl: "베네루핀은 바지락 등에서 발견되는 겨울철 조개독으로 피하출혈과 간 기능 저하를 유발합니다. (해냄 6p, 패류 중독)"
+  },
+  {
+    q: "12. 홍합이나 대합 등에서 발견되며 마비성 패독의 주성분으로, 테트로도톡신과 유사하게 Na+ 채널을 차단하는 물질은?",
+    a: ["Saxitoxin (삭시톡신)", "Okadaic acid", "Tetramine", "Venerupin", "Amygdalin"],
+    c: 0,
+    expl: "삭시톡신과 고니오톡신은 마비성 패독의 성분으로 봄철에 주로 발생하며 Na+ 채널을 차단합니다. (해냄 6p, 패류 중독)"
+  },
+  {
+    q: "13. 광대버섯 등에 함유된 독성분으로, 부교감신경 흥분(콜린성) 작용을 하여 축동, 호흡곤란을 일으키며 해독제로 아트로핀(Atropine)을 사용하는 것은?",
+    a: ["Amanitotoxin", "Muscarine (무스카린)", "Phallotoxin", "Ibotenic acid", "Gyromitrin"],
+    c: 1,
+    expl: "무스카린은 부교감신경을 흥분시켜 다양한 증상을 일으키며, 항콜린제인 아트로핀이 해독제로 사용됩니다. (해냄 6p, 독버섯 유래 자연독)"
+  },
+  {
+    q: "14. 투구꽃 등에 함유되어 있으며 Na+ 채널을 개방하여 부정맥과 신경 흥분을 유발하는 알칼로이드 성분은?",
+    a: ["Atropine", "Aconitine (아코니틴)", "Cicutoxin", "Hyoscyamine", "Muscarine"],
+    c: 1,
+    expl: "아코니틴은 Na+ 채널을 열어 심장과 신경계에 독성을 나타냅니다. (해냄 6p, 독버섯/자연독)"
+  },
+  {
+    q: "15. 청매, 살구씨 등에 들어있는 청산배당체인 아미그달린(Amygdalin)이 체내 β-glucosidase에 의해 분해되어 생성되는 독성 물질은?",
+    a: ["Aflatoxin", "HCN (시안화수소)", "Formaldehyde", "Nitrosamine", "Benzene"],
+    c: 1,
+    expl: "아미그달린은 효소에 의해 시안화수소(HCN)를 생성하며, 이는 세포 내 호흡 효소인 Cytochrome oxidase를 억제합니다. (해냄 6p, 청산배당체)"
+  },
+  {
+    q: "16. 곰팡이 독소(Mycotoxin) 중 Aspergillus flavus에 의해 생성되며, 강력한 간암 유발 물질로 알려진 것은?",
+    a: ["Patulin", "Zearalenone", "Aflatoxin (아플라톡신)", "Ochratoxin", "Citreoviridin"],
+    c: 2,
+    expl: "아플라톡신은 간 독성 및 간암을 일으키는 대표적인 곰팡이 독소입니다. (해냄 6p, 곰팡이독)"
+  },
+  {
+    q: "17. 쌀이 황색으로 변하는 황변미 중독의 원인이 되며, 신장 독성을 유발하는 곰팡이 독소는?",
+    a: ["Islanditoxin", "Citreoviridin", "Citrinine (시트리닌)", "Patulin", "Aflatoxin"],
+    c: 2,
+    expl: "시트리닌은 Penicillium 속 곰팡이에 의해 생성되며 신장 독성을 나타냅니다. (해냄 6p, 황변미독)"
+  },
+  {
+    q: "18. 주로 사과, 포도 쥬스 등에서 발견되며 뇌출혈, 폐수종을 유발할 수 있는 Penicillium 속의 곰팡이 독소는?",
+    a: ["Patulin (파툴린)", "Zearalenone", "Islanditoxin", "Aflatoxin", "Citrinine"],
+    c: 0,
+    expl: "파툴린은 상한 사과 등 과실류에서 주로 발생하는 곰팡이 독소입니다. (해냄 6p, 곰팡이독)"
+  },
+  {
+    q: "19. 식품의 산패를 방지하기 위해 사용되는 산화방지제(Antioxidant)에 해당하는 성분은?",
+    a: ["Benzoic acid", "Sorbic acid", "BHA (Butylated Hydroxy Anisole)", "Saccharin", "Dehydroacetic acid"],
+    c: 2,
+    expl: "BHA, BHT, 몰식자산 프로필 등은 대표적인 지용성 산화방지제입니다. (해냄 6p, 식품첨가물)"
+  },
+  {
+    q: "20. 식품의 색을 유지하거나 강화하기 위해 사용되는 발색제 중 아질산나트륨이 육류의 헤모글로빈과 결합하여 형성하는 안정된 색소 형태는?",
+    a: ["Myoglobin", "Nitrosomyoglomogen", "Met-hemoglobin", "Chlorophyll", "Melanin"],
+    c: 1,
+    expl: "아질산염은 가열 시 Nitrosomyoglomogen을 형성하여 육류의 선홍색을 유지합니다. (해냄 6p, 식품첨가물)"
+  },
+  {
+    q: "21. 식품첨가물 중 보존료(Preservative)로 사용되나 산성 pH에서 효과가 좋으며 간 기능 장애 유발 가능성이 있는 것은?",
+    a: ["BHA", "Xylitol", "Benzoic acid (안식향산)", "Curcumin", "Sorbitol"],
+    c: 2,
+    expl: "안식향산(Benzoic acid)은 대표적인 보존료로 산성 환경에서 항균력이 증가합니다. (해냄 6p, 보존료)"
+  },
+  {
+    q: "22. 과거 감미료로 사용되었으나 독성(발암성, 혈액독성) 문제로 현재 사용이 금지된 유해 감미료는?",
+    a: ["Saccharin", "Aspartame", "Dulcin (둘신)", "Sorbitol", "Xylitol"],
+    c: 2,
+    expl: "둘신, 사이클라메이트 등은 유해 감미료로 분류되어 사용이 금지되어 있습니다. (해냄 6p, 유해첨가물)"
+  },
+  {
+    q: "23. 밀가루의 표백 및 개량제로 사용되나 비타민 파괴 및 신장 독성 우려로 사용이 제한적인 산화 표백제는?",
+    a: ["아질산나트륨", "과산화수소", "차아염소산나트륨", "안식향산", "프로피온산"],
+    c: 1,
+    expl: "과산화수소는 산화 표백제로 쓰이며 사용 후 완전히 제거되어야 합니다. (해냄 6p, 식품첨가물)"
+  },
+  {
+    q: "24. 민물고기(잉어, 붕어 등)를 생식했을 때 감염되며, 간 담관에 기생하여 간경화나 담관암을 유발할 수 있는 기생충은?",
+    a: ["폐흡충", "간흡충 (Clonorchis sinensis)", "요코가와흡충", "광절열두조충", "무두조충"],
+    c: 1,
+    expl: "간흡충은 담수어 생식을 통해 감염되는 우리나라의 대표적인 기생충입니다. (해냄 6p, 기생충 감염증)"
+  },
+  {
+    q: "25. 참게나 가재를 생식할 경우 감염되며, 각혈(흉통) 등 폐 질환 증상을 유발하는 기생충은?",
+    a: ["간흡충", "폐흡충", "아니사키스", "유구조충", "회충"],
+    c: 1,
+    expl: "폐흡충은 다슬기 -> 참게/가재를 거쳐 사람에게 감염됩니다. (해냄 6p, 기생충 감염증)"
+  },
+  {
+    q: "26. 바다생선(고등어, 오징어 등)을 생식한 후 급격한 복통과 구토를 일으키며 위벽을 파고드는 기생충은?",
+    a: ["간흡충", "아니사키스 (Anisakis)", "무구조충", "회충", "요충"],
+    c: 1,
+    expl: "아니사키스는 해산 어패류를 생식할 때 감염되어 위장 장애를 일으킵니다. (해냄 6p, 기생충 감염증)"
+  },
+  {
+    q: "27. 돼지고기를 생식했을 때 감염되는 기생충으로, 뇌유낭충증 등을 유발할 수 있는 조충류는?",
+    a: ["무구조충", "유구조충 (갈고리조충)", "광절열두조충", "왜소조충", "만손열두조충"],
+    c: 1,
+    expl: "유구조충은 돼지고기, 무구조충은 쇠고기를 통해 감염됩니다. (해냄 6p, 기생충 감염증)"
+  },
+  {
+    q: "28. 경구감염병과 세균성 식중독을 비교했을 때, 경구감염병의 특징에 해당하는 것은?",
+    a: ["잠복기가 짧다", "2차 감염이 빈번하다", "균량이 많이 필요하다", "음식물 내에서 균이 증식해야 한다", "치명률이 매우 낮다"],
+    c: 1,
+    expl: "경구감염병은 소량의 균으로도 감염되며 2차 감염이 흔하고 잠복기가 깁니다. (해냄 6p, 경구감염병 vs 식중독)"
+  },
+  {
+    q: "29. 식품의 부패 과정에서 단백질 아미노산인 리신(Lysine)이 탈탄산 반응을 거쳐 생성되는 부패 생성물은?",
+    a: ["Tyramine", "Cadaverine (카다베린)", "Histamine", "Agmatine", "Putrescine"],
+    c: 1,
+    expl: "리신은 탈탄산되어 카다베린을, 아르기닌은 아그마틴을 형성합니다. (해냄 6p, 부패의 화학반응)"
+  },
+  {
+    q: "30. 수분 활성도(Aw)에 대한 설명 중 미생물이 이용할 수 있는 수분의 함량을 나타내며, 일반적으로 미생물의 증식이 억제되는 수치 이하는?",
+    a: ["0.95 이하", "0.85 이하", "0.65 이하", "0.45 이하", "0.15 이하"],
+    c: 2,
+    expl: "Aw가 0.65 이하가 되면 대부분의 미생물은 증식하지 못합니다. (해냄 6p, 수분활성)"
+  }
+];
+
+    let currentQuestion = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    const questionText = document.getElementById("question-text");
+    const optionsList = document.getElementById("options-list");
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
+    const progress = document.getElementById("progress");
+    const quizBox = document.getElementById("quiz-box");
+    const resultScreen = document.getElementById("result-screen");
+    const finalScore = document.getElementById("final-score");
+    const scoreMessage = document.getElementById("score-message");
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionText.innerText = q.q;
+        optionsList.innerHTML = "";
+        
+        progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+        
+        if (currentQuestion === 0) {
+            prevBtn.style.display = "none";
+        } else {
+            prevBtn.style.display = "block";
+        }
+
+        const answeredIndex = userAnswers[currentQuestion];
+        const isAnswered = answeredIndex !== null;
+
+        if (isAnswered) {
+            feedback.style.display = "block";
+            nextBtn.style.display = "block";
+            if (currentQuestion === quizData.length - 1) {
+                 nextBtn.innerText = "결과 보기";
+            } else {
+                 nextBtn.innerText = "다음 문제 ➡️";
+            }
+            
+            if (answeredIndex === q.c) {
+                feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+            } else {
+                feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+            }
+        } else {
+            feedback.style.display = "none";
+            nextBtn.style.display = "none";
+        }
+
+        q.a.forEach((option, index) => {
+            const li = document.createElement("li");
+            const btn = document.createElement("button");
+            btn.innerText = option;
+            
+            if (isAnswered) {
+                btn.disabled = true;
+                if (index === q.c) {
+                    btn.classList.add("correct");
+                } else if (index === answeredIndex && index !== q.c) {
+                    btn.classList.add("wrong");
+                }
+            } else {
+                btn.onclick = () => checkAnswer(index, btn);
+            }
+            
+            li.appendChild(btn);
+            optionsList.appendChild(li);
+        });
+    }
+
+    function checkAnswer(selectedIndex, btn) {
+        userAnswers[currentQuestion] = selectedIndex;
+        
+        const q = quizData[currentQuestion];
+        const buttons = optionsList.querySelectorAll("button");
+        buttons.forEach(b => b.disabled = true);
+
+        if (selectedIndex === q.c) {
+            btn.classList.add("correct");
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+        } else {
+            btn.classList.add("wrong");
+            buttons[q.c].classList.add("correct");
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+        }
+
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+        
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "결과 보기";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let finalScoreValue = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            if (userAnswers[i] === quizData[i].c) {
+                finalScoreValue++;
+            }
+        }
+
+        quizBox.style.display = "none";
+        resultScreen.style.display = "block";
+        finalScore.innerText = `${finalScoreValue} / ${quizData.length}점`;
+        
+        if (finalScoreValue >= 25) {
+            scoreMessage.innerText = "대단하네! 이 정도면 국시 예방약학은 걱정 없겠어!";
+        } else if (finalScoreValue >= 15) {
+            scoreMessage.innerText = "잘했네! 틀린 부분만 다시 복습하면 완벽할 걸세.";
+        } else {
+            scoreMessage.innerText = "조금 더 분발하게. 해냄 3페이지를 다시 꼼꼼히 읽어보게나.";
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
