@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>71회 예방약학 ㄱㅊ</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; }
+        
+        /* 메인으로 가기 버튼 스타일 */
+        .home-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding: 8px 12px;
+            background-color: #f1f3f5;
+            border-radius: 20px;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        .home-btn:hover { background-color: #e9ecef; color: #333; }
+
+        h1 { font-size: 20px; color: #333; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-top: 0; }
+        .progress { text-align: right; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; line-height: 1.5; }
+        .options { list-style: none; padding: 0; }
+        .options li { margin-bottom: 10px; }
+        .options button { width: 100%; padding: 12px; font-size: 16px; text-align: left; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .options button:hover { background-color: #e8f5e9; }
+        
+        /* 정답/오답 스타일 */
+        .options button.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .options button.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        
+        .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
+        .feedback strong { color: #d9534f; }
+        
+        /* 버튼 컨테이너 (좌우 배치) */
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; display: none; }
+        .prev-btn { background-color: #6c757d; color: white; }
+        .prev-btn:hover { background-color: #5a6268; }
+        .next-btn { background-color: #4CAF50; color: white; }
+        .next-btn:hover { background-color: #45a049; }
+
+        .result-screen { text-align: center; display: none; }
+        .score { font-size: 40px; font-weight: bold; color: #4CAF50; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <a href="index.html" class="home-btn">🏠 메인 메뉴로</a>
+
+    <div id="quiz-box">
+        <h1>💊 예방 전범위 모의고사(71)</h1>
+        <div class="progress" id="progress">문제 1 / 20</div>
+        <div class="question" id="question-text">문제 로딩중...</div>
+        <ul class="options" id="options-list"></ul>
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">⬅️ 이전 문제</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 문제 ➡️</button>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1>수고했습니다! 자네의 점수는?</h1>
+        <div class="score" id="final-score"></div>
+        <p id="score-message"></p>
+        <div class="btn-container">
+            <button class="nav-btn next-btn" style="display:block; background-color:#666;" onclick="location.href='index.html'">메인으로</button>
+            <button class="nav-btn next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 20 Questions covering all 6 pages of 'Haenaem'
+    const quizData = [
+    { 
+        q: "61. 질병 발생의 원인을 설명하는 역학적 삼각형(epidemiologic triangle) 모델의 구성 요소는?", 
+        a: ["병인, 숙주, 장소", "병인, 숙주, 환경", "병인, 시간, 환경", "숙주, 시간, 장소", "시간, 장소, 환경"], 
+        c: 1, 
+        expl: "질병 발생은 병인(Agent), 숙주(Host), 환경(Environment)의 평형이 깨질 때 발생한다는 모델입니다." 
+    },
+    { 
+        q: "62. 수용성이 비교적 낮아 세기관지나 폐포까지 도달하여 폐포벽 점막에 국소적 염증을 유발하고, 광화학 옥시단트 생성의 원인이 되는 가스상 물질은?", 
+        a: ["벤젠증기", "수은증기", "이산화황", "이산화질소", "일산화탄소"], 
+        c: 3, 
+        expl: "이산화질소($NO_2$)는 수용성이 낮아 하부 호흡기까지 도달하며, 대기 중 라디칼 반응을 통해 오존($O_3$) 및 옥시단트 생성에 관여합니다." 
+    },
+    { 
+        q: "63. 정상인이 식품이나 환경을 통해 평생 노출되어도 유해 영향이 나타나지 않을 것으로 기대되는 1일 노출허용량을 의미하는 용어는?", 
+        a: ["최소영향관찰량(LOAEL)", "기준용량(benchmark dose)", "독성참고치(reference dose)", "최대무영향관찰량(NOAEL)", "노출한계(margin of exposure)"], 
+        c: 2, 
+        expl: "독성참고치($RfD$)는 $NOAEL$ 또는 $LOAEL$ 값을 불확실성계수($UF$) 등으로 나눈 값으로, 비발암물질의 위해도 평가 지표입니다." 
+    },
+    { 
+        q: "64. 발암 과정에서 장내미생물에 의한 대사(nitroreductase 등)가 필수적인 물질은?", 
+        a: ["aflatoxin B1", "benzene", "2,6-dinitrotoluene", "2,3,7,8-TCDD", "vinyl chloride"], 
+        c: 2, 
+        expl: "2,6-dinitrotoluene은 장내 미생물에 의한 환원 및 대사 과정이 있어야만 발암성을 나타냅니다." 
+    },
+    { 
+        q: "65. Acetaminophen의 간독성에 대한 설명으로 옳은 것은?", 
+        a: ["간소엽의 zone 1에 특이적으로 독성을 유발한다.", "Glucuronic acid 포합에 의해 독성이 더 강해진다.", "대사 과정 없이 DNA와 직접 결합하여 독성을 유발한다.", "Phase I 대사 없이 glutathione 포합이 일어난다.", "NAPQI는 CYP와 PHS 두 기전으로 생성될 수 있다."], 
+        c: 4, 
+        expl: "독성 대사체인 NAPQI는 주로 CYP에 의해 생성되지만, Prostaglandin H synthase(PHS)에 의해서도 생성될 수 있습니다. (Zone 3에서 호발)" 
+    },
+    { 
+        q: "66. 독성물질과 그 기원을 옳게 연결한 것은?", 
+        a: ["cycasin – 고사리 뿌리 성분", "Trp-P-1 – 생선구이 중 아미노산 열분해", "benzo[a]pyrene – 아질산과 아민의 반응", "acrylamide – 먹는물 염소 소독 부산물", "dimethylnitrosamine – 숯불구이 중 지질 분해"], 
+        c: 1, 
+        expl: "Trp-P-1은 단백질이나 아미노산(트립토판)이 고온에서 가열될 때 생성되는 변이원성 물질입니다." 
+    },
+    { 
+        q: "67. 세포분열 후 수복되지 않은 염색체 단편이 잔존하는 현상을 관찰하는 유전독성 시험법은?", 
+        a: ["소핵 시험", "Draize 시험", "Hershberger 시험", "복귀돌연변이 시험", "마우스 lymphoma TK 시험"], 
+        c: 0, 
+        expl: "소핵 시험은 염색체 절단 등에 의해 생성된 소핵(micronucleus)을 관찰하여 염색체 이상 여부를 판정합니다." 
+    },
+    { 
+        q: "68. Methomyl이나 propoxur(카바메이트계)의 중독에 사용할 수 있는 해독제는?", 
+        a: ["N-acetylcysteine", "atropine", "EDTA", "methylene blue", "penicillamine"], 
+        c: 1, 
+        expl: "카바메이트계 살충제 중독 시에는 항콜린제인 atropine을 사용하며, 유기인계와 달리 PAM 사용에는 주의가 필요합니다." 
+    },
+    { 
+        q: "69. 만성 노출 시 과색소침착, 손바닥 각질화 등을 유발하며 IARC Group 1로 분류된 물질은?", 
+        a: ["납(Pb)", "비소(As)", "카드뮴(Cd)", "6가 크롬(Cr6+)", "메틸수은"], 
+        c: 1, 
+        expl: "비소는 특징적인 피부 병변(각질화, 색소침착)을 유발하는 인체 발암물질입니다." 
+    },
+    { 
+        q: "70. 점성이 큰 수용성 식이섬유로, 위 배출 속도를 늦춰 덤핑증후군 관리에 사용될 수 있는 것은?", 
+        a: ["cellulose", "chitin", "hemicellulose", "lignin", "pectic substance"], 
+        c: 4, 
+        expl: "펙틴(Pectin) 등 수용성 식이섬유는 음식물의 위 체류 시간을 늘리고 당 흡수를 지연시킵니다." 
+    },
+    { 
+        q: "71. α-Linolenic acid(n-3계)로부터 합성되어 중성지방 감소 및 혈소판 응집을 억제하는 지방산은?", 
+        a: ["arachidonic acid", "eicosapentaenoic acid", "linoleic acid", "γ-linolenic acid", "oleic acid"], 
+        c: 1, 
+        expl: "α-리놀렌산은 체내에서 EPA(eicosapentaenoic acid)와 DHA로 전환됩니다." 
+    },
+    { 
+        q: "72. 단백질 식이 부족으로 부종, 설사, 지방간비대를 특징으로 하는 영양부족 질환은?", 
+        a: ["소모증(marasmus)", "카시아워커(kwashiorkor)", "메니에르증후군", "길랑바레증후군", "베르니케 뇌병증"], 
+        c: 1, 
+        expl: "카시아워커는 에너지는 섭취하나 단백질이 극도로 부족할 때 나타나며 부종이 특징입니다." 
+    },
+    { 
+        q: "73. 알코올탈수소효소의 성분이며, 결핍 시 생식기 발달 저해와 미각이상이 나타나는 무기질은?", 
+        a: ["아연(Zn)", "망간(Mn)", "셀레늄(Se)", "코발트(Co)", "몰리브덴(Mo)"], 
+        c: 0, 
+        expl: "아연은 $ADH$의 활성 중심에 존재하며 결핍 시 성장 지연 및 미각 감퇴를 유발합니다." 
+    },
+    { 
+        q: "74. Isoniazid(결핵약)를 장기간 복용할 때 결핍되어 말초신경염을 유발할 수 있는 비타민은?", 
+        a: ["folic acid", "vitamin B6", "vitamin B12", "vitamin E", "vitamin K"], 
+        c: 1, 
+        expl: "Isoniazid는 비타민 $B_6$(pyridoxine)의 길항제로 작용하므로 보충 투여가 필요합니다." 
+    },
+    { 
+        q: "75. 식품 중 histidine을 histamine으로 대사시켜 알레르기성 식중독을 유발하는 원인균은?", 
+        a: ["Bacillus anthracis", "Morganella morganii", "Listeria monocytogenes", "Campylobacter jejuni", "Staphylococcus aureus"], 
+        c: 1, 
+        expl: "Morganella morganii(Proteus morganii)는 붉은살 생선에서 히스타민을 생성하여 식중독을 일으킵니다." 
+    },
+    { 
+        q: "76. Sodium channel에 작용하여 Na+의 투과를 선택적으로 억제하는 마비성 패독 성분은?", 
+        a: ["α-amanitin", "fumonisin B", "grayanotoxin", "saxitoxin", "zearalenone"], 
+        c: 3, 
+        expl: "Saxitoxin은 신경세포막의 $Na^+$ 채널을 차단하여 흥분 전달을 억제합니다." 
+    },
+    { 
+        q: "77. 환원작용을 통해 표백하며, 공기 중에서 다시 산화되면 표백 효과가 소실되는 식품 첨가물은?", 
+        a: ["질산칼륨", "과산화수소", "아황산수소나트륨", "과황산암모늄", "희석과산화벤조일"], 
+        c: 2, 
+        expl: "아황산염류는 환원성 표백제로, 다시 산화되면 원래 색으로 돌아오는 결점이 있습니다." 
+    },
+    { 
+        q: "78. 건강기능식품 소재와 그 기능성이 옳게 연결된 것은?", 
+        a: ["홍국-관절 건강", "정어리 펩타이드-혈압 개선", "글루코사민-콜레스테롤 개선", "쏘팔메토-체지방 감소", "가르시니아-전립선 건강"], 
+        c: 1, 
+        expl: "정어리 펩타이드는 $ACE$ 저해 기전을 통해 혈압 개선에 도움을 줍니다." 
+    },
+    { 
+        q: "79. [사례] 가축 분뇨 유입 후 발생, 염소 소독에 저항성이 강하고 4개의 자포자를 가진 원인 병원체는?", 
+        a: ["Cryptosporidium parvum", "E. coli O157:H7", "H. pylori", "Leptospira interrogans", "Shigella dysenteriae"], 
+        c: 0, 
+        expl: "크립토스포리디움은 염소 소독에 매우 강한 저항성을 보이는 수계 감염 원충입니다." 
+    },
+    { 
+        q: "80. 위 79번의 원인 병원체(Cryptosporidium)를 사멸 또는 제거하기에 가장 효과적인 방법은?", 
+        a: ["불소처리", "연화처리", "오존처리", "폭기처리", "황산동처리"], 
+        c: 2, 
+        expl: "염소에 저항성이 있는 원충류는 오존($O_3$) 소독이나 막 여과 공법으로 제거해야 합니다." 
+    }
+];
+
+
+    let currentQuestion = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    const questionText = document.getElementById("question-text");
+    const optionsList = document.getElementById("options-list");
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
+    const progress = document.getElementById("progress");
+    const quizBox = document.getElementById("quiz-box");
+    const resultScreen = document.getElementById("result-screen");
+    const finalScore = document.getElementById("final-score");
+    const scoreMessage = document.getElementById("score-message");
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionText.innerText = q.q;
+        optionsList.innerHTML = "";
+        
+        progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+        
+        if (currentQuestion === 0) {
+            prevBtn.style.display = "none";
+        } else {
+            prevBtn.style.display = "block";
+        }
+
+        const answeredIndex = userAnswers[currentQuestion];
+        const isAnswered = answeredIndex !== null;
+
+        if (isAnswered) {
+            feedback.style.display = "block";
+            nextBtn.style.display = "block";
+            if (currentQuestion === quizData.length - 1) {
+                 nextBtn.innerText = "결과 보기";
+            } else {
+                 nextBtn.innerText = "다음 문제 ➡️";
+            }
+            
+            if (answeredIndex === q.c) {
+                feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+            } else {
+                feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+            }
+        } else {
+            feedback.style.display = "none";
+            nextBtn.style.display = "none";
+        }
+
+        q.a.forEach((option, index) => {
+            const li = document.createElement("li");
+            const btn = document.createElement("button");
+            btn.innerText = option;
+            
+            if (isAnswered) {
+                btn.disabled = true;
+                if (index === q.c) {
+                    btn.classList.add("correct");
+                } else if (index === answeredIndex && index !== q.c) {
+                    btn.classList.add("wrong");
+                }
+            } else {
+                btn.onclick = () => checkAnswer(index, btn);
+            }
+            
+            li.appendChild(btn);
+            optionsList.appendChild(li);
+        });
+    }
+
+    function checkAnswer(selectedIndex, btn) {
+        userAnswers[currentQuestion] = selectedIndex;
+        
+        const q = quizData[currentQuestion];
+        const buttons = optionsList.querySelectorAll("button");
+        buttons.forEach(b => b.disabled = true);
+
+        if (selectedIndex === q.c) {
+            btn.classList.add("correct");
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+        } else {
+            btn.classList.add("wrong");
+            buttons[q.c].classList.add("correct");
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+        }
+
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+        
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "결과 보기";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let finalScoreValue = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            if (userAnswers[i] === quizData[i].c) {
+                finalScoreValue++;
+            }
+        }
+
+        quizBox.style.display = "none";
+        resultScreen.style.display = "block";
+        finalScore.innerText = `${finalScoreValue} / ${quizData.length}점`;
+        
+        // 20문제 기준 평가 메시지 조정
+        if (finalScoreValue >= 18) {
+            scoreMessage.innerText = "대단하네! 이 정도면 국시 예방약학 수석도 노려볼 만해!";
+        } else if (finalScoreValue >= 12) {
+            scoreMessage.innerText = "잘했네! 틀린 부분만 다시 해냄 자료로 복습하면 완벽할 걸세.";
+        } else {
+            scoreMessage.innerText = "조금 더 분발하게. 올려준 해냄 자료 6페이지 전체를 꼼꼼히 다시 읽어보게나.";
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
