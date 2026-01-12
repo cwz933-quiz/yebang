@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예방약학 모의고사(72)</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; }
+        
+        /* 메인으로 가기 버튼 스타일 */
+        .home-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding: 8px 12px;
+            background-color: #f1f3f5;
+            border-radius: 20px;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        .home-btn:hover { background-color: #e9ecef; color: #333; }
+
+        h1 { font-size: 20px; color: #333; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-top: 0; }
+        .progress { text-align: right; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; line-height: 1.5; }
+        .options { list-style: none; padding: 0; }
+        .options li { margin-bottom: 10px; }
+        .options button { width: 100%; padding: 12px; font-size: 16px; text-align: left; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .options button:hover { background-color: #e8f5e9; }
+        
+        /* 정답/오답 스타일 */
+        .options button.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .options button.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        
+        .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; font-size: 15px; color: #333; display: none; line-height: 1.6; }
+        .feedback strong { color: #d9534f; }
+        
+        /* 버튼 컨테이너 (좌우 배치) */
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; display: none; }
+        .prev-btn { background-color: #6c757d; color: white; }
+        .prev-btn:hover { background-color: #5a6268; }
+        .next-btn { background-color: #4CAF50; color: white; }
+        .next-btn:hover { background-color: #45a049; }
+
+        .result-screen { text-align: center; display: none; }
+        .score { font-size: 40px; font-weight: bold; color: #4CAF50; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <a href="index.html" class="home-btn">🏠 메인 메뉴로</a>
+
+    <div id="quiz-box">
+        <h1>💊 예방 전범위 모의고사(72)</h1>
+        <div class="progress" id="progress">문제 1 / 20</div>
+        <div class="question" id="question-text">문제 로딩중...</div>
+        <ul class="options" id="options-list"></ul>
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">⬅️ 이전 문제</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 문제 ➡️</button>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1>수고했습니다! 자네의 점수는?</h1>
+        <div class="score" id="final-score"></div>
+        <p id="score-message"></p>
+        <div class="btn-container">
+            <button class="nav-btn next-btn" style="display:block; background-color:#666;" onclick="location.href='index.html'">메인으로</button>
+            <button class="nav-btn next-btn" style="display:block" onclick="location.reload()">다시 풀기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 20 Questions covering all 6 pages of 'Haenaem'
+   const quizData = [
+        { 
+            q: "61. 분자역학에서 활용되는 생체지표(biomarker) 중 감수성지표(susceptibility biomarker)에 해당하는 것은?", 
+            a: ["혈액 중 troponin I와 T", "화학물질과 DNA의 결합체(adduct)", "소변이나 혈액 중의 화학물질 대사체", "혈액 중 alanine aminotransferase (ALT)", "화학물질 대사효소의 유전자 다형성(genetic polymorphism)"], 
+            c: 4, 
+            expl: "감수성지표는 특정 물질에 노출되었을 때 개인마다 나타나는 반응의 차이를 확인하는 지표로, 대사효소의 유전자 다형성이 대표적입니다." 
+        },
+        { 
+            q: "62. 가축에서 유산이 일어나며, 병원체에 감염된 가축의 고기나 유제품을 섭취한 사람에게서 파상열이 유발되는 인수공통감염병은?", 
+            a: ["큐열", "브루셀라증", "리스테리아증", "중동호흡기증후군", "지카바이러스감염증"], 
+            c: 1, 
+            expl: "브루셀라증은 가축의 유산을 일으키며, 감염된 가축을 통해 사람에게 전파되어 파상열(열이 올랐다 내렸다 함)을 일으킵니다." 
+        },
+        { 
+            q: "63. 단열재, 내화재 등의 건축자재에서 유래하여 흡입을 통해 노출되며, 폐에서 산화적 스트레스를 유발하고 악성중피종과 폐암을 유발하는 실내공기 오염물질은?", 
+            a: ["라듐", "벤젠", "석면", "톨루엔", "포름알데히드"], 
+            c: 2, 
+            expl: "석면은 악성 중피종의 주요 원인이며, 폐암을 유발하는 대표적인 건축자재 유래 오염물질입니다." 
+        },
+        { 
+            q: "64. 정수 처리 과정의 일반적인 염소소독으로는 불활성화되기 어려운 수인성 감염병의 원인체로서, 우리나라 20~40대 젊은 층에서 항체양성률이 낮고 감염률이 높은 바이러스는?", 
+            a: ["coxsackie virus", "hepatitis A virus", "poliovirus", "rotavirus", "varicella-zoster virus"], 
+            c: 1, 
+            expl: "A형 간염 바이러스는 염소 소독에 저항성이 있으며, 위생 수준 향상으로 항체 보유율이 낮은 젊은 층에서 감염률이 높게 나타납니다." 
+        },
+        { 
+            q: "65. 부영양화된 호소나 하천에서 증식한 남세균(Cyanobacteria)이 생산하는 고리형 펩티드(cyclic peptide)로서, 단백질 인산분해 효소(protein phosphatase)를 억제하거나 산화적 스트레스를 유발함으로써 간독성을 나타내는 물질은?", 
+            a: ["α-amanitin", "geosmin", "humic acid", "microcystin LR", "phalloidin"], 
+            c: 3, 
+            expl: "마이크로시스틴(Microcystin LR)은 남조류가 생산하는 독소로, 간의 단백질 인산분해 효소를 억제하여 강력한 간독성을 나타냅니다." 
+        },
+        { 
+            q: "66. 전신적으로 작용하면 척추 손상 등 골격계 장애를, 국소적으로 작용하면 레이노 현상(Raynaud's phenomenon)과 같은 말초순환장애를 유발하는 물리적 요인은?", 
+            a: ["빛", "고온", "소음", "진동", "방사선"], 
+            c: 3, 
+            expl: "진동에 장기간 노출되면 말초 혈관이 수축하여 손가락이 하얗게 변하는 레이노 현상(백지증)이 나타납니다." 
+        },
+        { 
+            q: "67. 대장암을 유발하는 이차발암물질로서, 대사활성화 과정에서 장내 세균의 β-glucuronidase 작용이 요구되는 것은?", 
+            a: ["2-acetylaminofluorene", "2-aminonaphthalene", "7,12-dimethylbenz[a]anthracene", "safrole", "sulfanilamide"], 
+            c: 1, 
+            expl: "2-aminonaphthalene은 간에서 포합되어 배설된 후, 장내 세균의 β-glucuronidase에 의해 다시 활성화되어 대장암을 유발할 수 있습니다." 
+        },
+        { 
+            q: "68. Phenylhydroxylamine이나 p-aminophenol로 대사되어 methemoglobin 혈증을 유발할 수 있는 화학물질은?", 
+            a: ["aniline", "bromobenzene", "cyclohexane", "isoniazid", "primaquine"], 
+            c: 0, 
+            expl: "아닐린(aniline)은 체내에서 페닐히드록실아민으로 대사되어 혈중 헤모글로빈을 메트헤모글로빈으로 변화시킵니다." 
+        },
+        { 
+            q: "69. 다음에서 설명하는 과정을 통해 수행되는 독성시험법은?\n- 기니피그의 제모한 피부에 면역보조제와 시험물질을 피내 주사한다.\n- 1주 후 동일 부위에 시험물질이 함유된 패치를 48시간 부착한다.\n- 2주 후 다른 부위의 피부에 시험물질이 함유된 패치를 24시간 부착한다.\n- 패치 제거 24시간, 48시간 후에 피부반응을 평가한다.", 
+            a: ["국소내성시험", "피부자극시험", "피부감작성시험", "아나필락시스 쇼크 반응시험", "수동 피부 아나필락시스 반응시험"], 
+            c: 2, 
+            expl: "제시된 설명은 물질에 의한 면역 반응(알레르기) 유발 여부를 확인하는 피부감작성시험법(Maximization Test 등)입니다." 
+        },
+        { 
+            q: "70. 다음 중 카드뮴에 의해 억제되는 신장의 vitamin D 활성화 반응은?\n7-dehydrocholesterol -(A)-> previtamin D3 -(B)-> vitamin D3 -(C)-> 25-hydroxyvitamin D3 -(D)-> 1α,25-dihydroxyvitamin D3 -(E)-> 1α,24,25-trihydroxyvitamin D3", 
+            a: ["(A)", "(B)", "(C)", "(D)", "(E)"], 
+            c: 3, 
+            expl: "카드뮴은 신장에서 25-OH-D3를 활성형인 1,25-(OH)2-D3로 전환하는 1α-hydroxylase를 저해합니다. (단계 D)" 
+        },
+        { 
+            q: "71. 1전자 환원(one-electron reduction)에 의해 자유라디칼 (free radical)로 대사되고 redox cycle을 통해 활성산소를 생성함으로써 폐독성을 유발하는 제초제는?", 
+            a: ["benzene hexachloride", "endrin", "glyphosate", "methomyl", "paraquat"], 
+            c: 4, 
+            expl: "파라콰트(paraquat)는 체내에서 1전자 환원 후 산소와 반응하여 활성산소를 지속적으로 생성하는 redox cycling을 통해 폐 손상을 일으킵니다." 
+        },
+        { 
+            q: "72. 동물 유해성 자료를 근거로 독성참고치(reference dose)를 산출할 때, 종간 및 종내 감수성 차이, 시험 기간, 자료의 질적 수준 등을 고려하여 설정하는 값은?", 
+            a: ["위해지수(hazard index)", "조정계수(modifying factor)", "기준용량(benchmark dose)", "노출한계(margin of exposure)", "불확실성계수(uncertainty factor)"], 
+            c: 4, 
+            expl: "실험동물의 자료를 사람에게 적용할 때 발생하는 차이를 보정하기 위해 사용하는 안전 계수를 불확실성계수라고 합니다." 
+        },
+        { 
+            q: "73. 글루탐산 잔기의 γ-carboxylation에 조효소로 작용함으로써 혈액응고나 골형성 관련 단백질의 기능에 필수적인 영양소는?", 
+            a: ["biotin", "folic acid", "nicotinic acid", "pantothenic acid", "phylloquinone"], 
+            c: 4, 
+            expl: "비타민 K(phylloquinone)는 프로트롬빈 등의 혈액응고 인자가 활성화되도록 돕는 γ-carboxylation 반응의 조효소입니다." 
+        },
+        { 
+            q: "74. 비타민 D 결핍, 시금치나 근대에 함유된 옥살산(oxalic acid), 곡물 껍질의 피트산(phytic acid), 과잉의 지방산에 의해 흡수가 저해되는 무기질은?", 
+            a: ["인", "철", "구리", "칼슘", "마그네슘"], 
+            c: 3, 
+            expl: "칼슘은 식이 성분인 옥살산이나 피트산과 결합하여 불용성 염을 형성하므로 흡수가 방해됩니다." 
+        },
+        { 
+            q: "75. 다음에서 설명하는 식중독 원인균은?\n- 특성: 내열성 용혈독을 생성하는 통성혐기성 호염균\n- 주요 감염 경로: 여름철 어패류의 생식\n- 감염 증상: 상복부의 격심한 통증과 구토, 설사, 발열", 
+            a: ["Clostridium botulinum", "Escherichia coli O157:H7", "Listeria monocytogenes", "Staphylococcus aureus", "Vibrio parahaemolyticus"], 
+            c: 4, 
+            expl: "장염비브리오(Vibrio parahaemolyticus)는 염분을 좋아하는 호염균으로 여름철 어패류 섭취를 통해 식중독을 유발합니다." 
+        },
+        { 
+            q: "76. 땀버섯과 광대버섯 등의 독버섯에 함유되어 있으며, 중독 시 부교감 신경을 흥분시켜 분비기능의 항진, 발한, 축동, 호흡곤란 등을 유발하는 알칼로이드는?", 
+            a: ["cicutoxin", "hyoscyamine", "muscarine", "phaseolunatin", "scopolamine"], 
+            c: 2, 
+            expl: "무스카린(muscarine)은 부교감 신경의 무스카린 수용체를 자극하여 콜린성 중독 증상을 나타내는 독버섯 성분입니다." 
+        },
+        { 
+            q: "77. 게나 가재와 같은 민물 갑각류의 생식을 통해 감염되고, 병원체가 폐에 기생할 수 있으며 기침, 객혈 등을 유발하는 기생충은?", 
+            a: ["요충증", "편충증", "회충증", "간흡충증", "폐흡충증"], 
+            c: 4, 
+            expl: "폐흡충증(폐디스토마)은 참게나 가재를 날로 먹었을 때 감염되며, 폐에 기생하며 결핵과 유사한 증상을 보입니다." 
+        },
+        { 
+            q: "78. 표백작용과 살균효과를 통해 제빵 효과를 증진하며, 제빵 과정 중에 안식향산으로 전환되는 밀가루 개량제는?", 
+            a: ["에리토브산(erythorbic acid)", "소르빈산칼슘(calcium sorbate)", "아황산나트륨(sodium sulfite)", "사카린나트륨(sodium saccharin)", "과산화벤조일(희석)(diluted benzoyl peroxide)"], 
+            c: 4, 
+            expl: "과산화벤조일은 밀가루의 표백과 숙성을 돕는 개량제로, 사용 후 안식향산으로 남게 됩니다." 
+        },
+        { 
+            q: "79. [사례] 신생아가 선별검사에서 혈액 중 류신(leucine), 이소류신(isoleucine), 발린(valine) 수치가 기준보다 높아 선천성 대사이상으로 진단되었다. 이 신생아에서 결핍되어 있을 것으로 추정되는 대사 효소는?", 
+            a: ["branched-chain α-keto acid dehydrogenase complex", "cystathionine β-synthase", "fumarylacetoacetate hydrolase", "phenylalanine hydroxylase", "tyrosine aminotransferase"], 
+            c: 0, 
+            expl: "제시된 아미노산들은 분지쇄 아미노산(BCAA)이며, 이들의 대사 이상은 BCKDC 효소 결핍으로 인한 단풍시럽뇨병(MSUD)입니다." 
+        },
+        { 
+            q: "80. [사례] 류신, 이소류신, 발린 수치가 높은 신생아에게 제한 식이의 공급과 함께 투여를 고려할 수 있는 조효소 성분은?", 
+            a: ["비오틴(biotin)", "티아민(thiamine)", "피리독신(pyridoxine)", "페닐알라닌(phenylalanine)", "코엔자임 Q10(coenzyme Q10)"], 
+            c: 1, 
+            expl: "티아민(비타민 B1)은 BCKDC 효소의 활성을 돕는 핵심 조효소(TPP)이므로 MSUD 치료 시 고용량 투여를 고려합니다." 
+        }
+    ];
+
+
+    let currentQuestion = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    const questionText = document.getElementById("question-text");
+    const optionsList = document.getElementById("options-list");
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
+    const progress = document.getElementById("progress");
+    const quizBox = document.getElementById("quiz-box");
+    const resultScreen = document.getElementById("result-screen");
+    const finalScore = document.getElementById("final-score");
+    const scoreMessage = document.getElementById("score-message");
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionText.innerText = q.q;
+        optionsList.innerHTML = "";
+        
+        progress.innerText = `문제 ${currentQuestion + 1} / ${quizData.length}`;
+        
+        if (currentQuestion === 0) {
+            prevBtn.style.display = "none";
+        } else {
+            prevBtn.style.display = "block";
+        }
+
+        const answeredIndex = userAnswers[currentQuestion];
+        const isAnswered = answeredIndex !== null;
+
+        if (isAnswered) {
+            feedback.style.display = "block";
+            nextBtn.style.display = "block";
+            if (currentQuestion === quizData.length - 1) {
+                 nextBtn.innerText = "결과 보기";
+            } else {
+                 nextBtn.innerText = "다음 문제 ➡️";
+            }
+            
+            if (answeredIndex === q.c) {
+                feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+            } else {
+                feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+            }
+        } else {
+            feedback.style.display = "none";
+            nextBtn.style.display = "none";
+        }
+
+        q.a.forEach((option, index) => {
+            const li = document.createElement("li");
+            const btn = document.createElement("button");
+            btn.innerText = option;
+            
+            if (isAnswered) {
+                btn.disabled = true;
+                if (index === q.c) {
+                    btn.classList.add("correct");
+                } else if (index === answeredIndex && index !== q.c) {
+                    btn.classList.add("wrong");
+                }
+            } else {
+                btn.onclick = () => checkAnswer(index, btn);
+            }
+            
+            li.appendChild(btn);
+            optionsList.appendChild(li);
+        });
+    }
+
+    function checkAnswer(selectedIndex, btn) {
+        userAnswers[currentQuestion] = selectedIndex;
+        
+        const q = quizData[currentQuestion];
+        const buttons = optionsList.querySelectorAll("button");
+        buttons.forEach(b => b.disabled = true);
+
+        if (selectedIndex === q.c) {
+            btn.classList.add("correct");
+            feedback.innerHTML = `<strong>정답입니다! 🙆‍♂️</strong><br>${q.expl}`;
+        } else {
+            btn.classList.add("wrong");
+            buttons[q.c].classList.add("correct");
+            feedback.innerHTML = `<strong>오답입니다 🙅‍♂️</strong><br>정답은 <strong>${q.a[q.c]}</strong> 입니다.<br>${q.expl}`;
+        }
+
+        feedback.style.display = "block";
+        nextBtn.style.display = "block";
+        
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "결과 보기";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let finalScoreValue = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            if (userAnswers[i] === quizData[i].c) {
+                finalScoreValue++;
+            }
+        }
+
+        quizBox.style.display = "none";
+        resultScreen.style.display = "block";
+        finalScore.innerText = `${finalScoreValue} / ${quizData.length}점`;
+        
+        // 20문제 기준 평가 메시지 조정
+        if (finalScoreValue >= 18) {
+            scoreMessage.innerText = "대단하네! 이 정도면 국시 예방약학 수석도 노려볼 만해!";
+        } else if (finalScoreValue >= 12) {
+            scoreMessage.innerText = "잘했네! 틀린 부분만 다시 해냄 자료로 복습하면 완벽할 걸세.";
+        } else {
+            scoreMessage.innerText = "조금 더 분발하게. 올려준 해냄 자료 6페이지 전체를 꼼꼼히 다시 읽어보게나.";
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
