@@ -83,7 +83,7 @@
 const quizData = [
   {
     "q": "1. 대사적 활성화 과정 없이 그 자체로 반응성이 강해 공유결합을 형성하며 발암성을 나타내는 '1차 발암물질'에 해당하는 것은?",
-    "a": ["Aflatoxin B1", "Benzo(a)pyrene", "2-Naphthylamine", "Alkylating agents (Mustards)", "Vinyl chloride"],
+    "a": ["Aflatoxin B1", "Benzo(a)pyrene", "2-Naphthylamine", "Alkylating agents", "Vinyl chloride"],
     "c": 3,
     "expl": "1차 발암물질은 직접 작용하는 발암물질로, 대사 활성화 없이 DNA와 결합합니다. 대표적으로 Alkylating agents, Nitrogen mustard, Epoxide 등이 있습니다. 나머지는 대사가 필요한 2차 발암물질입니다. (키워드 81-86)"
   },
@@ -113,7 +113,7 @@ const quizData = [
   },
   {
     "q": "6. 발암 과정 중 '프로모터(Promoter)'의 작용 기전으로 가장 적절한 설명은?",
-    "a": ["DNA와 직접 공유결합을 형성한다.", "DNA 염기 서열의 변이를 일으킨다.", "Protein Kinase C(PKC)를 활성화하여 세포 증식을 유도한다.", "전구 발암물질을 활성 발암물질로 대사시킨다.", "종양 억제 유전자를 직접 파괴한다."],
+    "a": ["DNA와 직접 공유결합을 형성한다.", "DNA 염기 서열의 변이를 일으킨다.", "Protein Kinase C를 활성화하여 세포 증식을 유도한다.", "전구 발암물질을 활성 발암물질로 대사시킨다.", "종양 억제 유전자를 직접 파괴한다."],
     "c": 2,
     "expl": "TPA(Phorbol ester)와 같은 프로모터는 유전 독성은 없으나, Protein Kinase C를 활성화하여 세포 분열과 증식을 촉진함으로써 암 발생을 돕습니다. (페이지 상단 설명)"
   },
@@ -125,7 +125,7 @@ const quizData = [
   },
   {
     "q": "8. 납(Pb) 중독 시 관찰되는 특징적인 혈액학적 소견은?",
-    "a": ["거대적아구성 빈혈", "호염기성 적혈구 (Basophilic stippling)", "용혈성 빈혈", "백혈구 증가증", "혈소판 감소증"],
+    "a": ["거대적아구성 빈혈", "호염기성 적혈구", "용혈성 빈혈", "백혈구 증가증", "혈소판 감소증"],
     "c": 1,
     "expl": "납 중독의 특징적인 소견으로 말초 혈액 도말 검사에서 호염기성 적혈구(Basophilic stippling)가 관찰됩니다. (키워드 92,93,94)"
   },
@@ -143,7 +143,7 @@ const quizData = [
   },
   {
     "q": "11. 유기수은(Methyl mercury) 중독의 특징적인 증상으로, 1950년대 일본에서 발생한 공해병과 관련된 것은?",
-    "a": ["미나마타병 (Minamata disease)", "이타이이타이병", "레이노 증후군", "파킨슨 증후군", "윌슨병"],
+    "a": ["미나마타병", "이타이이타이병", "레이노 증후군", "파킨슨 증후군", "윌슨병"],
     "c": 0,
     "expl": "메틸수은은 지용성이 커서 BBB와 태반을 잘 통과하며, 중추신경계에 치명적인 손상을 입혀 미나마타병(Hunter-Russell 증후군)을 유발합니다. (키워드 92,93,94)"
   },
@@ -161,13 +161,13 @@ const quizData = [
   },
   {
     "q": "14. 구리(Cu) 대사 이상으로 인해 간과 뇌에 구리가 축적되어 발생하는 유전 질환으로, 각막에 Kayser-Fleischer ring이 관찰되는 병은?",
-    "a": ["Menkes disease", "Wilson's disease (윌슨병)", "Hemochromatosis", "Acrodermatitis enteropathica", "Minamata disease"],
+    "a": ["Menkes disease", "Wilson's disease", "Hemochromatosis", "Acrodermatitis enteropathica", "Minamata disease"],
     "c": 1,
     "expl": "윌슨병은 구리 배설 장애로 인해 간, 뇌, 각막 등에 구리가 축적되는 질환입니다. 치료제로는 Penicillamine을 사용합니다. (키워드 131-136)"
   },
   {
     "q": "15. 아연(Zn) 제련이나 용접 작업 시 발생하는 산화아연(ZnO) 흄(Fume)을 흡입하여 발생하는 발열, 오한 등의 증상은?",
-    "a": ["금속열 (Metal fume fever)", "규폐증", "석면폐증", "천식", "폐기종"],
+    "a": ["금속열", "규폐증", "석면폐증", "천식", "폐기종"],
     "c": 0,
     "expl": "산화아연(ZnO) 등의 금속 산화물 흄을 흡입하면 일시적인 독감 유사 증상인 금속열(Metal fume fever)이 발생합니다. (키워드 131-136)"
   },
@@ -179,7 +179,7 @@ const quizData = [
   },
   {
     "q": "17. 유기인계(Organophosphate) 살충제인 Parathion 중독 시 나타나는 작용 기전은?",
-    "a": ["Acetylcholinesterase(AChE)의 가역적 억제", "Acetylcholinesterase(AChE)의 비가역적 억제 (인산화)", "Acetylcholine 수용체 차단", "Norepinephrine 재흡수 억제", "Dopamine 생성 억제"],
+    "a": ["Acetylcholinesterase(AChE)의 가역적 억제", "Acetylcholinesterase(AChE)의 비가역적 억제", "Acetylcholine 수용체 차단", "Norepinephrine 재흡수 억제", "Dopamine 생성 억제"],
     "c": 1,
     "expl": "Parathion 등 유기인계 살충제는 AChE를 비가역적으로 인산화시켜 억제하며, 시간이 지나면 'Aging'되어 회복이 불가능해집니다. (키워드 97-101)"
   },
@@ -197,7 +197,7 @@ const quizData = [
   },
   {
     "q": "20. 톨루엔(Toluene)이 체내 대사 과정을 거쳐 소변으로 배설되는 주된 형태는?",
-    "a": ["Phenol", "Muconic acid", "Hippuric acid (마뇨산)", "Mandelic acid", "Methylhippuric acid"],
+    "a": ["Phenol", "Muconic acid", "Hippuric acid", "Mandelic acid", "Methylhippuric acid"],
     "c": 2,
     "expl": "톨루엔은 대사되어 Benzoic acid가 된 후, Glycine과 포합하여 Hippuric acid 형태로 배설됩니다. 이는 톨루엔 노출의 생물학적 지표입니다. (키워드 102,103,104)"
   },
@@ -209,7 +209,7 @@ const quizData = [
   },
   {
     "q": "22. 비소(As) 만성 중독 시 피부에 나타나는 특징적인 증상이나 질환은?",
-    "a": ["청색증", "Bowen's disease (피부암 전구 병변)", "Chloracne (염소좌창)", "Steven-Johnson syndrome", "레이노 현상"],
+    "a": ["청색증", "Bowen's disease", "Chloracne", "Steven-Johnson syndrome", "레이노 현상"],
     "c": 1,
     "expl": "비소(As)는 피부 각화증, 흑피증을 유발하며, 특징적으로 피부암의 전구 병변인 Bowen's disease를 일으킵니다. (키워드 92-94, 131-136)"
   },
@@ -221,19 +221,19 @@ const quizData = [
   },
   {
     "q": "24. 타이레놀(Acetaminophen) 과량 복용으로 인한 간 독성 해독제로 사용하는 물질은?",
-    "a": ["Deferoxamine", "N-acetylcysteine (NAC)", "Penicillamine", "Atropine", "Ethanol"],
+    "a": ["Deferoxamine", "N-acetylcysteine", "Penicillamine", "Atropine", "Ethanol"],
     "c": 1,
     "expl": "N-acetylcysteine은 글루타치온의 전구체로 작용하여, 고갈된 글루타치온을 보충함으로써 Acetaminophen의 독성 대사체(NAPQI)를 해독합니다. (해독제 표)"
   },
   {
     "q": "25. 유기인계 살충제 중독 시 Acetylcholinesterase(AChE)를 활성화(재활성화)시키기 위해 사용하는 해독제는?",
-    "a": ["Atropine", "Pralidoxime (2-PAM)", "Physostigmine", "Naloxone", "Flumazenil"],
+    "a": ["Atropine", "Pralidoxime", "Physostigmine", "Naloxone", "Flumazenil"],
     "c": 1,
     "expl": "2-PAM은 유기인계 살충제에 의해 인산화된 AChE에서 인산기를 떼어내어 효소를 재활성화시키는 역할을 합니다. (Atropine은 증상 완화제). (해독제 표)"
   },
   {
     "q": "26. 납(Pb), 수은(Hg), 비소(As)와 같은 중금속 중독 시 공통적으로 사용할 수 있는 킬레이트 해독제는?",
-    "a": ["BAL (Dimercaprol)", "Deferoxamine", "Prussian blue", "Naloxone", "Ethanol"],
+    "a": ["BAL", "Deferoxamine", "Prussian blue", "Naloxone", "Ethanol"],
     "c": 0,
     "expl": "BAL(British Anti-Lewisite)은 SH기를 함유하고 있어 Pb, Hg, As, Cu 등 다양한 중금속과 결합하여 배설을 촉진합니다. (해독제 표)"
   },
